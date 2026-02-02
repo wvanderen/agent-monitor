@@ -1,0 +1,55 @@
+#!/bin/bash
+# Simple CLI wrapper for Agent Monitor
+
+cd "$(dirname "$0")"
+
+case "$1" in
+  status)
+    mix run -e "Monitor.Console.status()"
+    ;;
+  add)
+    mix run -e "Monitor.Console.add(\"$2\")"
+    ;;
+  remove)
+    mix run -e "Monitor.Console.remove(\"$2\")"
+    ;;
+  check)
+    mix run -e "Monitor.Console.check(\"$2\")"
+    ;;
+  list)
+    mix run -e "Monitor.Console.list()"
+    ;;
+  history)
+    mix run -e "Monitor.Console.history(\"$2\")"
+    ;;
+  watch)
+    echo "👀 Watching endpoints (press Ctrl+C to exit)..."
+    echo "$(printf '=%.0s' {1..60})"
+    while true; do
+      mix run -e "Monitor.Console.status()"
+      echo ""
+      sleep 5
+    done
+    ;;
+  *)
+    echo "🐱 Agent Monitor CLI"
+    echo "===================="
+    echo ""
+    echo "Usage: ./monitor [command] [args]"
+    echo ""
+    echo "Commands:"
+    echo "  status              Show all endpoint status"
+    echo "  add <url>           Add a new endpoint"
+    echo "  remove <url>        Remove an endpoint"
+    echo "  check <url>         Trigger immediate check"
+    echo "  list                List all endpoints"
+    echo "  history <url>       Show check history"
+    echo "  watch               Live status updates (every 5s)"
+    echo ""
+    echo "Examples:"
+    echo "  ./monitor status"
+    echo "  ./monitor add https://api.github.com"
+    echo "  ./monitor watch"
+    exit 1
+    ;;
+esac

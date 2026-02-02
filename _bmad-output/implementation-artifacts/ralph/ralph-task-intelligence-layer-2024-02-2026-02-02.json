@@ -1,0 +1,175 @@
+{
+  "completion_promise": "<promise>COMPLETE</promise>",
+  "max_iterations": 20,
+  "active": true,
+  "task_format": "structured_json_feature_list",
+  "requirement_mappings": {
+    "intelligence-layer-2024-02": {
+      "title": "Add AI Intelligence Layer to Agent Monitor",
+      "requirements": [
+        {
+          "id": "REQ-1",
+          "description": "LLM router service integrates with coordinator for smart alert routing",
+          "mapped_to_task": "Task 1: Create LLM router service module (lib/llm_router.ex)"
+        },
+        {
+          "id": "REQ-2",
+          "description": "Anomaly detection baseline is established and learns from historical data",
+          "mapped_to_task": "Task 2: Implement anomaly detection with ETS table for baseline metrics"
+        },
+        {
+          "id": "REQ-3",
+          "description": "Root cause analysis correlates failures across multiple endpoints",
+          "mapped_to_task": "Task 3: Build root cause analysis module for correlation logic"
+        },
+        {
+          "id": "REQ-4",
+          "description": "Alert deduplication prevents spam notifications for known issues",
+          "mapped_to_task": "Task 4: Implement alert deduplication with time window logic"
+        },
+        {
+          "id": "REQ-5",
+          "description": "Recovery suggestions from LLM are displayed in console output",
+          "mapped_to_task": "Task 5: Add LLM recovery suggestions to console output"
+        },
+        {
+          "id": "REQ-6",
+          "description": "E2E tests verify intelligent routing (e.g., low severity alerts not escalated)",
+          "mapped_to_task": "Task 6: Write E2E tests for intelligent routing verification"
+        }
+      ]
+    }
+  },
+  "documentation_update_instructions": {
+    "story_file": "/home/lem/dev/agent_monitor/_bmad-output/stories/intelligence-layer.story.md",
+    "task_list_file": "this JSON file",
+    "synchronization_rules": [
+      {
+        "rule": "Update Story",
+        "description": "When completing a requirement, update the corresponding checkbox in the original BMAD story file",
+        "action": "Update story file's acceptance_criteria section"
+      },
+      {
+        "rule": "Update Task List",
+        "description": "Mark features as passes: true in this JSON as implementation progresses",
+        "action": "Update the passes field in features array"
+      },
+      {
+        "rule": "Add Vital Documentation",
+        "description": "If new technical decisions, API endpoints, or architectural patterns emerge, document them in both files",
+        "action": "Add to story's technical_context AND this JSON's documentation section"
+      }
+    ],
+    "why_important": [
+      "Enables comprehensive BMAD code review workflow to trace everything back to original story",
+      "Preserves traceability across the Ralph loop and code review lifecycle",
+      "Prevents information loss between Ralph iterations and code review",
+      "Reduces chance of agents inappropriately modifying test definitions (JSON is harder to modify than markdown)"
+    ]
+  },
+  "completion_instructions": {
+    "promise_format": "<promise>COMPLETE</promise>",
+    "loop_behavior": "Work iteratively until ALL acceptance criteria are met and verified",
+    "post_iteration_actions": [
+      "Implement requirements in order",
+      "Run tests and fix failures",
+      "Update both original BMAD story file AND this JSON file with progress",
+      "Verify implementation against requirements"
+    ],
+    "completion_criteria": [
+      "All acceptance criteria satisfied",
+      "All tests pass",
+      "All features marked passes: true",
+      "Documentation updated in both story and task list"
+    ],
+    "output_promise": "When genuinely complete and all criteria satisfied, output exactly: <promise>COMPLETE</promise>",
+    "warning": "DO NOT output the promise until all acceptance criteria are truly satisfied"
+  },
+  "features": [
+    {
+      "category": "functional",
+      "description": "LLM router service integrates with coordinator for smart alert routing",
+      "steps": [
+        "Create lib/llm_router.ex module with Claude AI integration",
+        "Add message handler to AgentMonitor.Coordinator for LLM routing requests",
+        "Implement severity classification logic based on LLM analysis",
+        "Add support for OpenAI integration (optional, for faster decisions)",
+        "Configure API keys and model selection in application config"
+      ],
+      "passes": true,
+      "requirement_id": "REQ-1",
+      "mapped_from": "intelligence-layer-2024-02"
+    },
+    {
+      "category": "functional",
+      "description": "Anomaly detection baseline is established and learns from historical data",
+      "steps": [
+        "Create ETS table for storing historical metrics",
+        "Implement baseline calculation from historical data",
+        "Add sliding window logic for anomaly detection (compare last N checks to baseline)",
+        "Track response times and success rates for baseline establishment",
+        "Implement learning mechanism to update baseline as system evolves"
+      ],
+      "passes": true,
+      "requirement_id": "REQ-2",
+      "mapped_from": "intelligence-layer-2024-02"
+    },
+    {
+      "category": "functional",
+      "description": "Root cause analysis correlates failures across multiple endpoints",
+      "steps": [
+        "Create root cause analysis module",
+        "Implement correlation logic to identify patterns across endpoint failures",
+        "Store failure patterns in ETS table for historical reference",
+        "Add pattern matching for common failure scenarios",
+        "Integrate with LLM for intelligent failure interpretation"
+      ],
+      "passes": true,
+      "requirement_id": "REQ-3",
+      "mapped_from": "intelligence-layer-2024-02"
+    },
+    {
+      "category": "functional",
+      "description": "Alert deduplication prevents spam notifications for known issues",
+      "steps": [
+        "Create alert deduplication module with time window logic",
+        "Implement 5-minute time window to prevent duplicate alerts",
+        "Store recent alerts in ETS table for deduplication lookup",
+        "Add alert tracking to identify known issues",
+        "Configure deduplication timeout in application config"
+      ],
+      "passes": true,
+      "requirement_id": "REQ-4",
+      "mapped_from": "intelligence-layer-2024-02"
+    },
+    {
+      "category": "functional",
+      "description": "Recovery suggestions from LLM are displayed in console output",
+      "steps": [
+        "Integrate LLM recovery suggestions into console output",
+        "Add Monitor.Console.analyze(url) command for on-demand analysis",
+        "Format LLM suggestions for clear console display",
+        "Add severity levels (INFO, WARNING, ERROR, CRITICAL) to console output",
+        "Test recovery suggestion display for various failure scenarios"
+      ],
+      "passes": true,
+      "requirement_id": "REQ-5",
+      "mapped_from": "intelligence-layer-2024-02"
+    },
+    {
+      "category": "testing",
+      "description": "E2E tests verify intelligent routing (e.g., low severity alerts not escalated)",
+      "steps": [
+        "Write E2E test for intelligent routing verification",
+        "Test low severity alerts are not escalated",
+        "Test critical alerts are properly escalated",
+        "Test anomaly detection flags correct deviations",
+        "Test alert deduplication prevents spam notifications",
+        "Verify root cause analysis correlates failures correctly"
+      ],
+      "passes": true,
+      "requirement_id": "REQ-6",
+      "mapped_from": "intelligence-layer-2024-02"
+    }
+  ]
+}
