@@ -23,7 +23,11 @@ defmodule AgentMonitor.MixProject do
   defp deps do
     [
       {:httpoison, "~> 2.2"},
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:swoosh, "~> 1.16"},
+      {:gen_smtp, "~> 1.0"},
+      {:yamerl, "~> 0.10"},
+      {:hackney, "~> 1.20"}
     ]
   end
 end

@@ -26,6 +26,15 @@ defmodule Monitor.Supervisor do
       # Registry for naming processes and storing PID mappings
       {Registry, keys: :unique, name: Monitor.Registry},
 
+      # Notification Dispatcher for sending alerts through multiple channels
+      {Notifications.Dispatcher, []},
+
+      # Playbooks for incident response automation
+      {Playbooks, []},
+
+      # Remediation system for automated service recovery
+      {Remediation, []},
+
       # LLM Router for intelligent alert routing and analysis
       LLMRouter,
 

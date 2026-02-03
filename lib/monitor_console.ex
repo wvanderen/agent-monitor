@@ -18,6 +18,9 @@ defmodule Monitor.Console do
     • Monitor.Console.list()         - List all monitored endpoints
     • Monitor.Console.history(url)   - Show check history for endpoint
     • Monitor.Console.analyze(url)   - Get AI-powered analysis with recovery suggestions
+    • Monitor.Console.remediate(url, playbook_id) - Run incident response playbook for endpoint
+    • Monitor.Console.playbooks()    - List available incident response playbooks
+    • Monitor.Console.remediation_history() - Show remediation history
     """)
 
     :ok
@@ -261,5 +264,88 @@ defmodule Monitor.Console do
       {:error, _reason} ->
         IO.puts("  No correlation data available")
     end
+  end
+
+  def remediate(url, playbook_id \\ "restart-failing-service") do
+    IO.puts("\n🔧 Running remediation playbook for #{url}")
+
+    context = %{
+      url: url,
+      service_name: extract_service_name(url),
+      triggered_at: DateTime.utc_now()
+    }
+
+    case Playbooks.run(playbook_id, context) do
+      {:ok, result} ->
+        IO.puts("✅ Remediation completed successfully")
+        IO.puts("   Steps executed: #{length(result.results)}")
+        :ok
+
+      {:error, reason} ->
+        IO.puts("❌ Remediation failed: #{inspect(reason)}")
+        :error
+    end
+  end
+
+  def playbooks do
+    IO.puts("\n📚 Available Playbooks:")
+    IO.puts(String.duplicate("=", 60))
+
+    case Playbooks.list() do
+      playbooks when is_list(playbooks) and length(playbooks) > 0 ->
+        Enum.each(playbooks, fn playbook ->
+          IO.puts("\n• #{playbook.id}")
+          IO.puts("  Name: #{playbook.name}")
+          IO.puts("  Description: #{playbook.description}")
+        end)
+
+        IO.puts("\n" <> String.duplicate("=", 60))
+        IO.puts("\nTotal: #{length(playbooks)} playbooks")
+
+      _ ->
+        IO.puts("No playbooks available")
+    end
+
+    :ok
+  end
+
+  def remediation_history(limit \\ 10) do
+    IO.puts("\n📜 Remediation History:")
+    IO.puts(String.duplicate("=", 60))
+
+    case Remediation.get_history(limit) do
+      history when is_list(history) and length(history) > 0 ->
+        Enum.with_index(history, fn item, idx ->
+          status_icon =
+            case item.status do
+              :succeeded -> "✅"
+              :failed -> "❌"
+              :aborted -> "⏸️"
+              _ -> "⏳"
+            end
+
+          IO.puts("\n#{idx + 1}. #{status_icon} #{item.service_name}")
+          IO.puts("   Action: #{item.action}")
+          IO.puts("   Status: #{item.status}")
+          IO.puts("   Queued: #{DateTime.to_string(item.queued_at)}")
+
+          if item.completed_at do
+            IO.puts("   Completed: #{DateTime.to_string(item.completed_at)}")
+          end
+        end)
+
+        IO.puts("\n" <> String.duplicate("=", 60))
+        IO.puts("\nShowing #{length(history)} of #{length(history)} total")
+
+      _ ->
+        IO.puts("No remediation history available")
+    end
+
+    :ok
+  end
+
+  defp extract_service_name(url) do
+    uri = URI.parse(url)
+    String.replace(uri.host || url, ~r/[.:]/, "_")
   end
 end

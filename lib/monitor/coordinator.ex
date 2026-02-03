@@ -123,6 +123,7 @@ defmodule Monitor.Coordinator do
       {:ok, true} ->
         AlertDeduplication.record_alert(url, nil, severity)
         log_intelligent_alert(url, severity, suggestions)
+        send_notification(url, severity, suggestions, state)
 
       {:ok, false} ->
         Logger.debug("Alert deduplicated for #{url}")
@@ -176,5 +177,43 @@ defmodule Monitor.Coordinator do
   defp log_intelligent_alert(url, severity, _suggestions) do
     severity_str = LLMRouter.Severity.to_string(severity)
     Logger.warning("🚨 [#{severity_str}] Intelligent Alert: #{url}")
+  end
+
+  defp send_notification(url, severity, suggestions, state) do
+    notification =
+      Notifications.Notification.new(%{
+        title: "Alert: #{url}",
+        message: build_notification_message(url, severity, suggestions),
+        severity: severity,
+        url: url,
+        metadata: %{
+          suggestions: suggestions,
+          severity: LLMRouter.Severity.to_string(severity)
+        }
+      })
+
+    Notifications.Dispatcher.send(notification)
+  end
+
+  defp build_notification_message(url, severity, suggestions) when is_list(suggestions) do
+    severity_str = LLMRouter.Severity.to_string(severity)
+    suggestion_list = Enum.map_join(suggestions, "\n", &"- #{&1}")
+
+    """
+    Endpoint: #{url}
+    Severity: #{severity_str}
+
+    Recovery Suggestions:
+    #{suggestion_list}
+    """
+  end
+
+  defp build_notification_message(url, severity, _suggestions) do
+    severity_str = LLMRouter.Severity.to_string(severity)
+
+    """
+    Endpoint: #{url}
+    Severity: #{severity_str}
+    """
   end
 end
