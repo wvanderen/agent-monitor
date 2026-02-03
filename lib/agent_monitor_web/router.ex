@@ -25,6 +25,7 @@ defmodule AgentMonitorWeb.Router do
     live("/workflows/:id", WorkflowDetailLive, :show)
     live("/workflows/:workflow_id/diagram", WorkflowDiagramLive, :show)
     live("/playbooks", PlaybookLive, :index)
+    live("/playbooks/new", PlaybookEditorLive, :new)
     live("/playbooks/:id/edit", PlaybookEditorLive, :edit)
     live("/marketplace", MarketplaceLive, :index)
     live("/conversations/:workflow_id", ConversationLive, :show)

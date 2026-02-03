@@ -3,9 +3,6 @@ defmodule AgentMonitorWeb.CoreComponents do
   Provides core UI components.
   """
   use Phoenix.Component
-  import Phoenix.VerifiedRoutes
-
-  alias Phoenix.LiveView.JS
 
   @doc """
   Renders a button.

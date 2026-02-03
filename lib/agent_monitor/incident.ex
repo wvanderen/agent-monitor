@@ -24,6 +24,7 @@ defmodule AgentMonitor.Incident do
     has_many(:workflows, AgentMonitor.Workflow)
     has_many(:comments, AgentMonitor.Comment)
     has_many(:uptime_metrics, AgentMonitor.UptimeMetric)
+    has_many(:attachments, AgentMonitor.Attachment)
 
     many_to_many(:related_incidents, AgentMonitor.Incident,
       join_through: "incident_relations",
@@ -82,6 +83,17 @@ defmodule AgentMonitor.Incident do
     change(incident, status: new_status)
   end
 
+  def severity_changeset(incident, attrs) do
+    incident
+    |> cast(attrs, [:severity])
+    |> validate_required([:severity])
+    |> validate_change(
+      :severity,
+      fn _current, new_severity ->
+        can_transition_severity_to?(incident, new_severity)
+      end, message: "Invalid severity transition")
+  end
+
   def severity_order(severity) do
     case severity do
       :P1 -> 0
@@ -105,9 +117,19 @@ defmodule AgentMonitor.Incident do
     |> Enum.member?(new_status)
   end
 
+  def can_transition_severity_to?(incident, new_severity) do
+    valid_severity_transitions(incident.severity)
+    |> Enum.member?(new_severity)
+  end
+
   defp valid_transitions(:open), do: [:in_progress, :closed]
   defp valid_transitions(:in_progress), do: [:resolved, :reopened, :closed]
   defp valid_transitions(:resolved), do: [:closed, :reopened]
   defp valid_transitions(:closed), do: [:reopened]
   defp valid_transitions(:reopened), do: [:open, :in_progress]
+
+  defp valid_severity_transitions(:P1), do: [:P1, :P2, :P3, :P4]
+  defp valid_severity_transitions(:P2), do: [:P1, :P2, :P3, :P4]
+  defp valid_severity_transitions(:P3), do: [:P1, :P2, :P3, :P4]
+  defp valid_severity_transitions(:P4), do: [:P1, :P2, :P3, :P4]
 end

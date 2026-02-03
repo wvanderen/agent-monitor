@@ -12,7 +12,6 @@ defmodule AgentMonitor.Repo.Migrations.CreateIncidents do
       add(:detected_at, :utc_datetime)
       add(:resolved_at, :utc_datetime)
       add(:closed_at, :utc_datetime)
-      add(:playbook_id, references(:playbooks, type: :binary_id), null: true)
 
       timestamps()
     end
@@ -20,6 +19,5 @@ defmodule AgentMonitor.Repo.Migrations.CreateIncidents do
     create(index(:incidents, [:status]))
     create(index(:incidents, [:severity]))
     create(index(:incidents, [:assigned_to]))
-    create(index(:incidents, [:playbook_id]))
   end
 end

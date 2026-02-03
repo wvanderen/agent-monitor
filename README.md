@@ -1,16 +1,20 @@
 # Agent Monitor 🐱
 
-A concurrent, fault-tolerant service monitor built with Elixir. Demonstrates why the BEAM VM is perfect for AI agent orchestration.
+A concurrent, fault-tolerant service monitor with AI agent orchestration built with Elixir. Demonstrates why the BEAM VM is perfect for multi-agent AI systems.
 
 ## What Makes This Special?
 
-This isn't just another monitoring tool. It's a demonstration of **Elixir's superpower for AI agents**:
+This isn't just another monitoring tool. It's a production-ready **AI agent orchestration platform**:
 
-- ✅ **True Concurrency**: Each endpoint runs in its own process — no thread pools, no async/await complexity
+- ✅ **True Concurrency**: Each endpoint and agent runs in its own process — no thread pools, no async/await complexity
+- ✅ **Agent Chaining**: Monitor → Investigate → Remediate → Verify workflow execution
+- ✅ **Parallel Execution**: Support for DAG-based parallel agent workflows with fault isolation
 - ✅ **Let It Crash**: If any checker crashes, the supervisor automatically restarts it
 - ✅ **Fault Isolation**: One failing endpoint can't take down the rest
-- ✅ **Hot Reloading**: Add/remove endpoints without restarting the app
+- ✅ **Hot Reloading**: Add/remove endpoints and agents without restarting the app
 - ✅ **Scalable**: Monitor hundreds of endpoints with minimal overhead
+- ✅ **Conversation History**: Full context management across agent interactions
+- ✅ **Human-in-the-Loop**: Approval workflows for sensitive remediation actions
 
 ## Quick Start
 
@@ -62,29 +66,100 @@ mix run -e "Monitor.Console.add(\"https://api.github.com\")"
 ## Architecture
 
 ```
-Monitor.Supervisor (Root)
+AgentMonitor.Supervisor (Root)
 ├── Monitor.Registry (Process naming)
 ├── Monitor.Coordinator (Aggregates results)
-└── Monitor.CheckerSupervisor (Dynamic)
-    └── Monitor.EndpointChecker (Per URL)
-    └── Monitor.EndpointChecker (Per URL)
-    └── ...
+├── Monitor.CheckerSupervisor (Dynamic)
+│   └── Monitor.EndpointChecker (Per URL)
+├── AgentMonitor.WorkflowEngine (Agent orchestration)
+├── AgentMonitor.ConversationManager (Context management)
+├── AgentMonitor.ParallelExecutor (Parallel workflows)
+└── TaskSupervisor (Agent execution)
 ```
 
 ### Key Components
 
 - **EndpointChecker**: Independent process that monitors a single URL
+- **WorkflowEngine**: Orchestrates agent workflows (sequential and parallel)
+- **ConversationManager**: Manages conversation history and context across agents
+- **ParallelExecutor**: Handles parallel agent execution with result aggregation
 - **Coordinator**: Central hub collecting results and triggering alerts
 - **Supervisor**: Ensures all processes stay alive (automatic restarts)
 
-## Next Steps (Homework!)
+### Agent Types
 
-Now that you have the basics running, try:
+- **MonitorAgent**: Monitors endpoints and detects anomalies
+- **InvestigateAgent**: Performs root cause analysis using LLM
+- **RemediateAgent**: Executes automated fixes (with approval workflow)
+- **VerifyAgent**: Verifies remediation success
+
+## Web Interface
+
+The platform includes a Phoenix LiveView dashboard for real-time monitoring and management:
+
+### Dashboard
+- Real-time workflow monitoring
+- Incident tracking with severity levels
+- Agent status and uptime metrics
+
+### Conversations
+- Chat-style interface for agent interactions
+- Filter by agent, time range, and keywords
+- Full conversation history with context
+
+### Incidents
+- Create and manage incidents
+- Attach files and add comments
+- Assign incidents to team members
+- Track incident lifecycle (open → in_progress → resolved → closed)
+
+### Playbooks
+- Create and edit incident response playbooks
+- Define agent workflows with steps
+- Configure approval requirements
+- Export playbooks as JSON
+
+### Approval System
+- Review pending remediation approvals
+- Approve or reject actions with reason
+- Email notifications for approval requests
+
+## Agent Workflow Features
+
+### Sequential Execution
+Default workflow chain: `monitor_agent → investigate_agent → remediate_agent → verify_agent`
+
+- Output from each agent passes as input to the next
+- Automatic retry on agent failure
+- Configurable timeout handling
+
+### Parallel Execution
+- Support for DAG-based parallel workflows
+- Independent branches with isolated contexts
+- Result aggregation at convergence points
+- Fault isolation - one branch failure doesn't stop others
+
+### Context Management
+- Full conversation history access for all agents
+- Context includes: previous outputs, incident data, system state, user inputs
+- Immutable snapshots for each workflow step
+- Token-aware summarization for long conversations
+
+### Human-in-the-Loop
+- Agents can request approval for sensitive actions
+- Risk assessment based on agent type and context
+- Approval whitelist for trusted operations
+- Automatic expiry for pending approvals
+
+## Next Steps
+
+Now that you have the platform running, try:
 
 1. **Experiment with concurrency**: Add 20+ endpoints and watch it handle them effortlessly
 2. **Test fault tolerance**: Find an endpoint checker PID and kill it — watch it auto-restart
-3. **Add intelligent recovery**: Hook the coordinator up to an LLM to suggest fixes
-4. **Build a dashboard**: Use Phoenix LiveView for real-time visualization
+3. **Create a parallel workflow**: Define a playbook with parallel branches
+4. **Test approval workflow**: Configure an agent to require approval
+5. **Build custom agents**: Add new agent types following the `execute/1` interface
 
 ## Learning Resources
 

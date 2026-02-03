@@ -14,6 +14,7 @@ defmodule AgentMonitor.WorkflowEngine do
   alias AgentMonitor.ConversationManager
   alias AgentMonitor.ApprovalWhitelistChecker
   alias AgentMonitor.Incident
+  alias Notifications
 
   @default_workflow_chain [:monitor_agent, :investigate_agent, :remediate_agent, :verify_agent]
   @workflow_timeout 300_000
@@ -138,7 +139,24 @@ defmodule AgentMonitor.WorkflowEngine do
             aggregated.aggregated_output
           )
 
-        AgentMonitor.Repo.update(Workflow.update_context_changeset(workflow, updated_context))
+        updated_branch_status =
+          Map.put(
+            workflow.branch_status || %{},
+            "step_#{step_index}",
+            %{
+              total_branches: aggregated.total_branches,
+              successful_branches: aggregated.successful_branches,
+              failed_branches: aggregated.failed_branches,
+              completed_at: DateTime.utc_now()
+            }
+          )
+
+        AgentMonitor.Repo.update(
+          Workflow.changeset(workflow, %{
+            context: updated_context,
+            branch_status: updated_branch_status
+          })
+        )
 
         if aggregated.failed_branches > 0 do
           {:error, :parallel_branch_failure, step_index}
@@ -299,7 +317,9 @@ defmodule AgentMonitor.WorkflowEngine do
   end
 
   defp execute_agent_action(workflow, agent_name, context) do
-    case execute_agent(agent_name, context) do
+    task = Task.async(fn -> execute_agent(agent_name, context) end)
+
+    case Task.await(task, @workflow_timeout) do
       {:ok, result} ->
         conversation =
           Conversation.agent_message_changeset(
@@ -313,7 +333,15 @@ defmodule AgentMonitor.WorkflowEngine do
 
       {:error, reason} ->
         {:error, reason}
+
+      {:timeout} ->
+        Logger.error("Agent #{agent_name} timed out after #{@workflow_timeout}ms")
+        {:error, :timeout}
     end
+  rescue
+    e ->
+      Logger.error("Agent execution failed for #{agent_name}: #{inspect(e)}")
+      {:error, {:exception, e}}
   end
 
   defp send_approval_notification(approval_request) do
@@ -341,7 +369,7 @@ defmodule AgentMonitor.WorkflowEngine do
         }
       )
 
-    Notifications.Dispatcher.send(notification)
+    Notifications.send(notification)
   end
 
   defp determine_risk_level(agent_name, context) do
@@ -389,6 +417,23 @@ defmodule AgentMonitor.WorkflowEngine do
   end
 
   defp get_workflow_chain(workflow) do
+    case workflow.execution_mode do
+      :sequential ->
+        get_sequential_chain(workflow)
+
+      :parallel ->
+        get_parallel_chain(workflow)
+
+      :auto ->
+        if workflow.parallel_structure != [] do
+          get_parallel_chain(workflow)
+        else
+          get_sequential_chain(workflow)
+        end
+    end
+  end
+
+  defp get_sequential_chain(workflow) do
     case workflow.playbook_id do
       nil ->
         @default_workflow_chain
@@ -399,6 +444,24 @@ defmodule AgentMonitor.WorkflowEngine do
         if playbook,
           do: AgentMonitor.Playbook.get_workflow_chain(playbook),
           else: @default_workflow_chain
+    end
+  end
+
+  defp get_parallel_chain(workflow) do
+    if workflow.parallel_structure != [] do
+      workflow.parallel_structure
+    else
+      case workflow.playbook_id do
+        nil ->
+          @default_workflow_chain
+
+        playbook_id ->
+          playbook = AgentMonitor.Repo.get(AgentMonitor.Playbook, playbook_id)
+
+          if playbook,
+            do: AgentMonitor.Playbook.get_workflow_chain(playbook),
+            else: @default_workflow_chain
+      end
     end
   end
 
@@ -454,7 +517,13 @@ defmodule AgentMonitor.WorkflowEngine do
     agent_module = get_agent_module(agent_name)
 
     if Code.ensure_loaded?(agent_module) do
-      apply(agent_module, :execute, [context])
+      try do
+        apply(agent_module, :execute, [context])
+      rescue
+        e ->
+          Logger.error("Agent execution failed for #{agent_name}: #{inspect(e)}")
+          {:error, {:exception, e}}
+      end
     else
       Logger.error("Agent module not found: #{agent_name}")
       {:error, :agent_not_found}
@@ -466,7 +535,7 @@ defmodule AgentMonitor.WorkflowEngine do
       :monitor_agent -> AgentMonitor.EndpointCheckerAgent
       :investigate_agent -> AgentMonitor.RootCauseAnalysis
       :remediate_agent -> AgentMonitor.Remediation
-      :verify_agent -> AgentMonitor.EndpointCheckerAgent
+      :verify_agent -> AgentMonitor.VerifyAgent
       _ -> Module.concat([AgentMonitor, agent_name])
     end
   end

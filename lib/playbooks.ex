@@ -1,9 +1,9 @@
 defmodule Playbooks do
   @moduledoc """
-  Incident response playbook system.
+  GenServer for managing and executing playbooks.
 
-  Playbooks are predefined sequences of steps to remediate incidents.
-  They are defined in YAML or JSON format and support process isolation.
+  Provides playbook loading, execution, and step-by-step orchestration
+  with retry logic and proper error handling.
   """
 
   use GenServer
@@ -90,8 +90,6 @@ defmodule Playbooks do
   end
 
   @impl true
-
-  @impl true
   def init(opts) do
     Logger.info("Starting Playbooks Server")
 
@@ -154,8 +152,8 @@ defmodule Playbooks do
         new_playbooks = Map.merge(state.playbooks, playbooks)
         {:reply, {:ok, map_size(playbooks)}, %{state | playbooks: new_playbooks}}
 
-      {:error, reason} ->
-        {:reply, {:error, reason}, state}
+      _ ->
+        {:reply, result, state}
     end
   end
 
@@ -164,6 +162,7 @@ defmodule Playbooks do
     {:noreply, state}
   end
 
+  @spec execute_playbook(map(), map()) :: {:ok, map()} | {:error, any()}
   defp execute_playbook(playbook, context) do
     Logger.info("Running playbook: #{playbook.name}")
 
@@ -220,7 +219,7 @@ defmodule Playbooks do
           Logger.info("✓ Playbook #{playbook.id} completed successfully")
           {:ok, %{playbook: playbook.id, results: Enum.reverse(results)}}
 
-        %{status: :stopped, error: error, results: results} ->
+        %{status: :stopped, error: error, results: _results} ->
           Logger.error("✗ Playbook #{playbook.id} failed: #{inspect(error)}")
           {:error, error}
       end
@@ -296,7 +295,7 @@ defmodule Playbooks do
     end
   end
 
-  defp execute_restart_step(step, context) do
+  defp execute_restart_step(step, _context) do
     service = Map.get(step.params, :service)
 
     Logger.info("Restarting service: #{service}")
@@ -310,7 +309,7 @@ defmodule Playbooks do
     end
   end
 
-  defp execute_check_step(step, context) do
+  defp execute_check_step(step, _context) do
     url = Map.get(step.params, :url)
 
     Logger.info("Checking endpoint: #{url}")
@@ -457,15 +456,16 @@ defmodule Playbooks do
         end
 
       ext when ext in [".yml", ".yaml"] ->
-        case :yamerl.constrain_file(String.to_charlist(path), [:str_node_as_binary]) do
-          [parsed] ->
-            playbook = yamerl_to_map(parsed)
+        try do
+          {:ok, file_content} = File.read(path)
+          [parsed] = :yamerl.decode(String.to_charlist(file_content), [:str_node_as_binary])
+          playbook = yamerl_to_map(parsed)
 
-            case validate(playbook) do
-              :ok -> {:ok, playbook}
-              {:error, reason} -> {:error, reason}
-            end
-
+          case validate(playbook) do
+            :ok -> {:ok, playbook}
+            {:error, reason} -> {:error, reason}
+          end
+        rescue
           error ->
             {:error, {:parse_error, error}}
         end
@@ -479,13 +479,21 @@ defmodule Playbooks do
     Enum.map(list, &yamerl_to_map/1)
   end
 
-  defp yamerl_to_map({:yamerl_seq, _, _, _, _, _} = seq) do
-    :yamerl.seq_elements(seq) |> Enum.map(&yamerl_to_map/1)
+  defp yamerl_to_map({:yamerl_seq, seq}) do
+    Enum.map(seq, &yamerl_to_map/1)
   end
 
-  defp yamerl_to_map({:yamerl_map, _, _, _, _, _} = map) do
-    :yamerl.map_elements(map)
-    |> Enum.map(fn {[k], v} -> {String.to_atom(k), yamerl_to_map(v)} end)
+  defp yamerl_to_map({:yamerl_seq, _, seq}) do
+    Enum.map(seq, &yamerl_to_map/1)
+  end
+
+  defp yamerl_to_map({:yamerl_map, map}) do
+    Enum.map(map, fn {[k], v} -> {String.to_atom(k), yamerl_to_map(v)} end)
+    |> Map.new()
+  end
+
+  defp yamerl_to_map({:yamerl_map, _, map}) do
+    Enum.map(map, fn {[k], v} -> {String.to_atom(k), yamerl_to_map(v)} end)
     |> Map.new()
   end
 

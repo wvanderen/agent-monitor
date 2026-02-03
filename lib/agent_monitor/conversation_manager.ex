@@ -151,14 +151,20 @@ defmodule AgentMonitor.ConversationManager do
   # Private Functions
 
   @max_context_tokens 4096
+  @summary_message_threshold 10
 
   defp generate_summary(conversations) do
     total_tokens = calculate_total_tokens(conversations)
 
-    if total_tokens > @max_context_tokens do
-      create_summary_with_token_counting(conversations)
-    else
-      create_simple_summary(conversations)
+    cond do
+      total_tokens > @max_context_tokens ->
+        create_summary_with_token_counting(conversations)
+
+      length(conversations) > @summary_message_threshold ->
+        create_simple_summary(conversations)
+
+      true ->
+        conversations
     end
   end
 

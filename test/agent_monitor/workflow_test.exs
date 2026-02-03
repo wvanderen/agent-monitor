@@ -90,8 +90,8 @@ defmodule AgentMonitor.WorkflowTest do
       changeset = Workflow.update_context_changeset(workflow, new_context)
 
       expected_context = %{
-        "existing_key" => "value",
-        "new_key" => "new_value"
+        existing_key: "value",
+        new_key: "new_value"
       }
 
       assert changeset.changes[:context] == expected_context

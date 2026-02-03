@@ -1,8 +1,6 @@
 defmodule AgentMonitorWeb.IncidentController do
   use AgentMonitorWeb, :controller
 
-  import Ecto.Query
-
   def create(conn, %{"incident" => incident_params}) do
     incident_attrs =
       incident_params

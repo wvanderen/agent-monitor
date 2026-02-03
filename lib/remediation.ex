@@ -299,7 +299,7 @@ defmodule Remediation do
     end
   end
 
-  defp execute_service_command(service_name, command, opts) do
+  defp execute_service_command(service_name, command, _opts) do
     try do
       {output, exit_code} =
         System.cmd("systemctl", [command, service_name],

@@ -9,8 +9,6 @@ defmodule Notifications.Dispatcher do
   use GenServer
   require Logger
 
-  alias Notifications.{Channel, Notification}
-
   @type channel_config :: %{
           name: atom(),
           module: module(),
@@ -209,7 +207,7 @@ defmodule Notifications.Dispatcher do
 
   defp send_to_channel(channel_name, notification, state) do
     case Map.get(state.channels, channel_name) do
-      %{module: module} = config ->
+      %{module: module} = _config ->
         Logger.debug("Sending notification to #{channel_name}: #{notification.title}")
 
         case module.send(notification) do

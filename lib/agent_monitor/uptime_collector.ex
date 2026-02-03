@@ -115,16 +115,16 @@ defmodule AgentMonitor.UptimeCollector do
     start_time = System.monotonic_time(:millisecond)
 
     case HTTPoison.get(service_id, [], timeout: 10_000) do
-      {:ok, %{status_code: _code}} when _code >= 200 and _code < 300 ->
-        _end_time = System.monotonic_time(:millisecond)
-        response_time = _end_time - start_time
+      {:ok, %{status_code: code}} when code >= 200 and code < 300 ->
+        end_time = System.monotonic_time(:millisecond)
+        response_time = end_time - start_time
 
         collect_metric(service_id, :up, response_time)
 
       {:ok, %{status_code: code}} when code >= 400 and code < 500 ->
         collect_metric(service_id, :degraded)
 
-      {:ok, %{status_code: code}} ->
+      {:ok, %{status_code: _code}} ->
         collect_metric(service_id, :down)
 
       {:error, %{reason: :timeout}} ->
@@ -153,13 +153,30 @@ defmodule AgentMonitor.UptimeCollector do
     end
   end
 
-  defp fetch_metrics(_service_id, _time_range \\ nil) do
+  defp fetch_metrics(service_id, time_range \\ nil) do
     import Ecto.Query
 
-    from(u in UptimeMetric,
-      order_by: [desc: u.timestamp],
-      limit: 100
-    )
+    base_query =
+      if service_id do
+        from(u in UptimeMetric, where: u.service_id == ^service_id)
+      else
+        UptimeMetric
+      end
+
+    query_with_time_range =
+      if time_range do
+        {start_time, end_time} = time_range
+
+        from(u in base_query,
+          where: u.timestamp >= ^start_time and u.timestamp <= ^end_time
+        )
+      else
+        base_query
+      end
+
+    query_with_time_range
+    |> order_by([u], desc: u.timestamp)
+    |> limit(100)
     |> Repo.all()
   end
 end

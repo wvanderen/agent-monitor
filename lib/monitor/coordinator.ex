@@ -179,7 +179,7 @@ defmodule Monitor.Coordinator do
     Logger.warning("🚨 [#{severity_str}] Intelligent Alert: #{url}")
   end
 
-  defp send_notification(url, severity, suggestions, state) do
+  defp send_notification(url, severity, suggestions, _state) do
     notification =
       Notifications.Notification.new(%{
         title: "Alert: #{url}",

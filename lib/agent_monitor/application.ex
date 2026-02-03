@@ -11,7 +11,6 @@ defmodule AgentMonitor.Application do
       AgentMonitor.ParallelExecutor,
       AgentMonitor.ConversationManager,
       AgentMonitor.UptimeCollector,
-      AgentMonitor.ApprovalWhitelistChecker,
       AgentMonitor.ApprovalExpiryChecker,
       {Monitor.Supervisor,
        endpoints: [

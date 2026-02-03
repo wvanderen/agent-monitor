@@ -3,7 +3,6 @@ defmodule AgentMonitorWeb.ApprovalLive do
   import Ecto.Query
 
   alias AgentMonitor.ApprovalRequest
-  alias AgentMonitor.Workflow
   alias AgentMonitor.Repo
 
   @impl true
@@ -124,12 +123,42 @@ defmodule AgentMonitorWeb.ApprovalLive do
   defp is_expired?(approval) do
     DateTime.compare(DateTime.utc_now(), approval.expires_at) != :lt
   end
-end
 
-defp expires_at_class(approval) do
-  if is_expired?(approval) do
-    "mt-1 text-sm text-gray-900 text-red-600"
-  else
-    "mt-1 text-sm text-gray-900"
+  defp expires_at_class(approval) do
+    if is_expired?(approval) do
+      "mt-1 text-sm text-gray-900 text-red-600"
+    else
+      "mt-1 text-sm text-gray-900"
+    end
+  end
+
+  attr(:id, :string, default: nil)
+  attr(:show, :boolean, default: true)
+  attr(:on_cancel, :string, default: nil)
+  slot(:inner_block, required: true)
+  attr(:title, :string, default: nil)
+
+  def modal(assigns) do
+    ~H"""
+    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick={@on_cancel && Phoenix.LiveView.JS.push(@on_cancel)}></div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <%= if @title do %>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title"><%= @title %></h3>
+            </div>
+          <% end %>
+
+          <div class="px-4 py-5 sm:p-6">
+            <%= render_slot(@inner_block) %>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
   end
 end
