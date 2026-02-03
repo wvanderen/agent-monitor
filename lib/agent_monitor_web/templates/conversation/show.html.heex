@@ -1,0 +1,50 @@
+~H"""
+<div class="flex gap-4 mb-6">
+  <.link navigate={~p"/workflows/#{@workflow.incident_id}"} class="text-blue-600 hover:text-blue-800">
+    ← Back to Workflow
+  </.link>
+</div>
+
+<.header>
+  Conversation History
+  <:subtitle>Agent conversation for workflow <%= @workflow_id %></:subtitle>
+</.header>
+
+<div class="flex gap-4 mb-6">
+  <form phx-change="filter_agent" class="flex items-center gap-2">
+    <label class="text-sm font-medium text-zinc-700">Agent:</label>
+    <select name="agent_id" class="rounded-md border-zinc-300 text-sm">
+      <option value="all" selected={@filter_agent == :all}>
+        All Agents
+      </option>
+      <%= for message <- @messages |> Enum.map(& &1.agent_id) |> Enum.uniq() do %>
+        <option value={message} selected={@filter_agent == message}>
+          <%= message %>
+        </option>
+      <% end %>
+    </select>
+  </form>
+</div>
+
+<div class="space-y-4">
+  <%= for message <- @messages do %>
+    <div class="flex gap-4">
+      <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style={"background-color: #{agent_color(message.agent_id)}"}>
+        <%= String.first(message.agent_id) |> String.upcase() %>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="font-medium text-zinc-900"><%= message.agent_id %></span>
+          <span class="text-xs text-zinc-500"><%= Calendar.strftime(message.inserted_at, "%H:%M:%S") %></span>
+          <span class={"inline-flex items-center rounded px-2 py-0.5 text-xs font-medium", role_badge(message.role)}>
+            <%= message.role %>
+          </span>
+        </div>
+        <div class="rounded-lg bg-zinc-50 p-3 text-sm text-zinc-700">
+          <%= message.content %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+"""

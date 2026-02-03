@@ -24,7 +24,12 @@ defmodule RemediationE2ETest do
     end
 
     test "queue remediation action" do
-      {:ok, id} = Remediation.queue_remediation("test_service", :send_alert, %{message: "Test", severity: :warning})
+      {:ok, id} =
+        Remediation.queue_remediation("test_service", :send_alert, %{
+          message: "Test",
+          severity: :warning
+        })
+
       assert is_binary(id)
       assert String.starts_with?(id, "rem_")
     end
@@ -53,7 +58,22 @@ defmodule RemediationE2ETest do
     end
 
     test "validate playbook structure" do
-      valid_playbook = %{id: "test", name: "Test", steps: [%{name: "S1", type: :notify, params: %{}, timeout: 5000, on_failure: :continue, retry_count: 0}], timeout: 30000}
+      valid_playbook = %{
+        id: "test",
+        name: "Test",
+        steps: [
+          %{
+            name: "S1",
+            type: :notify,
+            params: %{},
+            timeout: 5000,
+            on_failure: :continue,
+            retry_count: 0
+          }
+        ],
+        timeout: 30000
+      }
+
       assert :ok = Playbooks.validate(valid_playbook)
     end
 
@@ -70,19 +90,43 @@ defmodule RemediationE2ETest do
 
   describe "Playbook steps" do
     test "notify step sends notification" do
-      step = %{name: "Test", type: :notify, params: %{title: "Test", message: "Test", severity: :info}, timeout: 5000, on_failure: :continue, retry_count: 0}
+      step = %{
+        name: "Test",
+        type: :notify,
+        params: %{title: "Test", message: "Test", severity: :info},
+        timeout: 5000,
+        on_failure: :continue,
+        retry_count: 0
+      }
+
       {:ok, result} = Playbooks.execute_step_public(step, %{}, 10000)
       assert result != nil
     end
 
     test "check step validates endpoint" do
-      step = %{name: "Check", type: :check, params: %{url: "https://httpbin.org/status/200"}, timeout: 5000, on_failure: :continue, retry_count: 0}
+      step = %{
+        name: "Check",
+        type: :check,
+        params: %{url: "https://httpbin.org/status/200"},
+        timeout: 5000,
+        on_failure: :continue,
+        retry_count: 0
+      }
+
       {:ok, result} = Playbooks.execute_step_public(step, %{}, 10000)
       assert result.status == :ok
     end
 
     test "wait step delays execution" do
-      step = %{name: "Wait", type: :wait, params: %{duration: 100}, timeout: 1000, on_failure: :continue, retry_count: 0}
+      step = %{
+        name: "Wait",
+        type: :wait,
+        params: %{duration: 100},
+        timeout: 1000,
+        on_failure: :continue,
+        retry_count: 0
+      }
+
       start_time = System.monotonic_time(:millisecond)
       {:ok, result} = Playbooks.execute_step_public(step, %{}, 10000)
       end_time = System.monotonic_time(:millisecond)

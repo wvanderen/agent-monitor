@@ -1,0 +1,80 @@
+~H"""
+<div class="flex gap-4 mb-6">
+  <.link navigate={~p"/"} class="text-blue-600 hover:text-blue-800">
+    ← Back to Dashboard
+  </.link>
+</div>
+
+<.header>
+  Incidents
+  <:subtitle>Manage and track all incidents</:subtitle>
+  <:actions>
+    <.button type="button" phx-click="create">New Incident</.button>
+  </:actions>
+</.header>
+
+<div class="flex gap-4 mb-6">
+  <form phx-change="filter_status" class="flex items-center gap-2">
+    <label class="text-sm font-medium text-zinc-700">Status:</label>
+    <select name="status" class="rounded-md border-zinc-300 text-sm">
+      <%= for status <- [:all, :open, :in_progress, :resolved, :closed, :reopened] do %>
+        <option value={status} selected={@filter_status == status}>
+          <%= String.capitalize(to_string(status)) %>
+        </option>
+      <% end %>
+    </select>
+  </form>
+
+  <form phx-change="filter_severity" class="flex items-center gap-2">
+    <label class="text-sm font-medium text-zinc-700">Severity:</label>
+    <select name="severity" class="rounded-md border-zinc-300 text-sm">
+      <%= for severity <- [:all, :P1, :P2, :P3, :P4] do %>
+        <option value={severity} selected={@filter_severity == severity}>
+          <%= severity %>
+        </option>
+      <% end %>
+    </select>
+  </form>
+</div>
+
+<div class="rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/5">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Title</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Severity</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Assigned To</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Detected</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-zinc-200">
+        <%= for incident <- @incidents do %>
+          <tr class="hover:bg-zinc-50">
+            <td class="px-6 py-4">
+              <.link navigate={~p"/incidents/#{incident.id}"} class="font-medium text-blue-600 hover:text-blue-800">
+                <%= incident.title %>
+              </.link>
+            </td>
+            <td class="px-6 py-4">
+              <span class={"inline-flex items-center rounded-md px-2 py-1 text-xs font-medium #{status_badge(incident.status)}"}>
+                <%= incident.status %>
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <span class={"inline-flex items-center rounded-md px-2 py-1 text-xs font-medium #{severity_badge(incident.severity)}"}>
+                <%= incident.severity %>
+              </span>
+            </td>
+            <td class="px-6 py-4 text-zinc-500"><%= incident.assigned_to || "Unassigned" %></td>
+            <td class="px-6 py-4 text-zinc-500">
+              <%= if incident.detected_at, do: Calendar.strftime(incident.detected_at, "%b %d, %Y %H:%M"), else: "-" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+"""

@@ -1,0 +1,122 @@
+~H"""
+<div class="container mx-auto px-4 py-8">
+  <.header>
+    Pending Approvals
+  </.header>
+
+  <div class="mt-8">
+    <%= if @approvals == [] do %>
+      <div class="text-center py-12 bg-gray-50 rounded-lg">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No pending approvals</h3>
+        <p class="mt-1 text-sm text-gray-500">All approval requests have been processed</p>
+      </div>
+    <% else %>
+      <div class="overflow-hidden bg-white shadow sm:rounded-md">
+        <ul role="list" class="divide-y divide-gray-200">
+          <%= for approval <- @approvals do %>
+            <li class="hover:bg-gray-50 px-4 py-4 sm:px-6">
+              <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center space-x-3">
+                    <p class="text-sm font-medium text-indigo-600 truncate"><%= approval.agent_id %></p>
+                    <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{risk_badge(approval.risk_level)}"}>
+                      <%= String.upcase(to_string(approval.risk_level)) %>
+                    </span>
+                  </div>
+                  <p class="mt-1 text-sm text-gray-500 truncate"><%= approval.action %></p>
+                  <div class="mt-2 text-xs text-gray-400">
+                    <span>Created: <%= Calendar.strftime(approval.inserted_at, "%Y-%m-%d %H:%M") %></span>
+                    <%= if is_expired?(approval) do %>
+                      <span class="ml-2 text-red-600 font-medium">EXPIRED</span>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2 ml-4">
+                  <button
+                    phx-click="show_details"
+                    phx-value-approval_id={approval.id}
+                    class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Details
+                  </button>
+                  <button
+                    phx-click="approve"
+                    phx-value-approval_id={approval.id}
+                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    phx-click="reject"
+                    phx-value-approval_id={approval.id}
+                    phx-value-reason="Rejected via UI"
+                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </div>
+
+  <%= if @show_details and @selected_approval do %>
+    <.modal
+      on_cancel="close_details"
+      title="Approval Details"
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Agent</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @selected_approval.agent_id %></p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Action</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @selected_approval.action %></p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Risk Level</label>
+          <span class={"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{risk_badge(@selected_approval.risk_level)}"}>
+            <%= String.upcase(to_string(@selected_approval.risk_level)) %>
+          </span>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Context</label>
+          <pre class="mt-1 text-xs text-gray-900 bg-gray-50 p-3 rounded overflow-auto max-h-64"><%= inspect(@selected_approval.context, pretty: true) %></pre>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Created</label>
+            <p class="mt-1 text-sm text-gray-900"><%= Calendar.strftime(@selected_approval.inserted_at, "%Y-%m-%d %H:%M:%S") %></p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Expires</label>
+            <p class={expires_at_class(@selected_approval)}>
+              <%= Calendar.strftime(@selected_approval.expires_at, "%Y-%m-%d %H:%M:%S") %>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex space-x-3 pt-4 border-t">
+          <button
+            phx-click="close_details"
+            class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </.modal>
+  <% end %>
+</div>
+"""

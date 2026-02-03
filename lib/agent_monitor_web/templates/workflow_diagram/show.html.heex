@@ -1,0 +1,109 @@
+~H"""
+<div class="container mx-auto px-4 py-8">
+  <%= if @workflow do %>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">Workflow Diagram</h1>
+      <p class="text-sm text-gray-600">Workflow ID: <%= @workflow.id %></p>
+      <p class="text-sm text-gray-600">Status: <%= String.upcase(to_string(@workflow.status)) %></p>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6">
+      <div class="mermaid" phx-hook="MermaidDiagram" id="workflow-diagram">
+        <%= raw(@diagram) %>
+      </div>
+    </div>
+
+    <%= if @show_node_details and @selected_node do %>
+      <div class="mt-6 bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Step Details</h2>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Agent</label>
+            <p class="mt-1 text-sm text-gray-900"><%= get_agent_name(@selected_node) %></p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Status</label>
+            <p class="mt-1 text-sm text-gray-900">
+              <%= String.upcase(to_string(get_step_status(@selected_node))) %>
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Timestamp</label>
+            <p class="mt-1 text-sm text-gray-900">
+              <%= if @selected_node[:timestamp] do %>
+                <%= Calendar.strftime(@selected_node.timestamp, "%Y-%m-%d %H:%M:%S") %>
+              <% else %>
+                N/A
+              <% end %>
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Index</label>
+            <p class="mt-1 text-sm text-gray-900"><%= @selected_node[:index] %></p>
+          </div>
+        </div>
+
+        <%= if @selected_node[:output] do %>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700">Output</label>
+            <pre class="mt-1 text-xs text-gray-900 bg-gray-50 p-3 rounded overflow-auto max-h-64"><%= inspect(@selected_node.output, pretty: true) %></pre>
+          </div>
+        <% end %>
+
+        <div class="mt-4">
+          <button
+            phx-click="close_details"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="text-center py-12 bg-gray-50 rounded-lg">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No workflow selected</h3>
+      <p class="mt-1 text-sm text-gray-500">Please select a workflow to view its diagram</p>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'default',
+    securityLevel: 'loose',
+  });
+
+  const MermaidDiagram = {
+    mounted() {
+      const container = this.el;
+      const diagram = container.textContent;
+
+      mermaid.render('mermaid-diagram', diagram).then(result => {
+        container.innerHTML = result.svg;
+      });
+    },
+
+    updated() {
+      const container = this.el;
+      const diagram = container.textContent;
+
+      mermaid.render('mermaid-diagram', diagram).then(result => {
+        container.innerHTML = result.svg;
+      });
+    }
+  };
+
+  export default MermaidDiagram;
+</script>
+"""

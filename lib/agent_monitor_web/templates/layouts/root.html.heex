@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" class="[scrollbar-gutter:stable]">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title suffix=" · Agent Monitor">
+      <%= assigns[:page_title] || "Agent Monitor" %>
+    </.live_title>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
+  </head>
+  <body class="bg-white/50 antialiased">
+    <div class="relative flex h-screen flex-col overflow-hidden">
+      <div class="flex-1 overflow-y-auto bg-zinc-50">
+        <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          {@inner_content}
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

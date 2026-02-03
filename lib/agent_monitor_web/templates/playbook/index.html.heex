@@ -1,0 +1,53 @@
+~H"""
+<div class="flex gap-4 mb-6">
+  <.link navigate={~p"/"} class="text-blue-600 hover:text-blue-800">
+    ← Back to Dashboard
+  </.link>
+</div>
+
+<.header>
+  Playbooks
+  <:subtitle>Manage incident response playbooks</:subtitle>
+  <:actions>
+    <.button type="button" phx-click="create">New Playbook</.button>
+  </:actions>
+</.header>
+
+<div class="space-y-4">
+  <%= for playbook <- @playbooks do %>
+    <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-zinc-900/5">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-zinc-900"><%= playbook.name %></h3>
+          <p class="text-sm text-zinc-500"><%= playbook.author %> · v<%= playbook.version %></p>
+        </div>
+        <div class="flex gap-2">
+          <.link navigate={~p"/workflows/create?playbook_id=#{playbook.id}"} class="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">
+            Use
+          </.link>
+          <.link navigate={~p"/playbooks/#{playbook.id}/edit"} class="rounded-lg bg-zinc-600 px-3 py-1 text-sm font-medium text-white hover:bg-zinc-700">
+            Edit
+          </.link>
+        </div>
+      </div>
+
+      <p class="text-sm text-zinc-600 mb-4"><%= playbook.description %></p>
+
+      <div class="flex gap-4 text-sm text-zinc-500">
+        <div class="flex items-center gap-1">
+          <span>📋</span>
+          <span><%= length(playbook.steps) %> steps</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span>🏷️</span>
+          <span><%= playbook.incident_type %></span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span>🖥️</span>
+          <span><%= playbook.service || "General" %></span>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+"""

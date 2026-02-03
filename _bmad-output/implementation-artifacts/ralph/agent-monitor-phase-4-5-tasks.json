@@ -1,0 +1,2426 @@
+{
+  "completion_promise": "<promise>COMPLETE</promise>",
+  "max_iterations": 20,
+  "active": true,
+  "task_format": "structured_json_feature_list",
+  "code_review_findings": {
+    "phase4-story4.1": {
+      "reviewed_at": "2026-02-02T21:30:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 5,
+        "medium": 4,
+        "low": 3
+      },
+      "critical_issues": [
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-1",
+          "description": "Missing agent modules - AgentMonitor.RootCauseAnalysis and AgentMonitor.Remediation don't exist but are referenced in workflow_engine.ex:292-294",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 292-294,
+          "requirement_id": "REQ-4.1-2",
+          "action_required": "Create missing agent modules with execute/1 function"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-2",
+          "description": "Agent interface mismatch - WorkflowEngine calls execute/1 but Monitor.EndpointChecker is a GenServer with no execute/1 function",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 282,
+          "requirement_id": "REQ-4.1-1",
+          "action_required": "Either create agent wrapper or redesign agent interface"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-3",
+          "description": "Duplicate changeset function - Workflow.ex has two changeset/2 definitions (lines 31-49 and 51-69), second overrides first",
+          "file": "lib/agent_monitor/workflow.ex",
+          "line": 31-69,
+          "requirement_id": "REQ-4.1-6",
+          "action_required": "Remove duplicate changeset function"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-4",
+          "description": "No tests for workflow engine - Zero tests for WorkflowEngine, Workflow schema, or sequential agent chaining",
+          "file": "test/",
+          "line": null,
+          "requirement_id": "REQ-4.1-1",
+          "action_required": "Add comprehensive test suite for workflow engine"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-5",
+          "description": "Silent agent failures - Missing agent modules return {:ok, %{status: :skipped}} instead of failing, masking errors",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 285,
+          "requirement_id": "REQ-4.1-1",
+          "action_required": "Change to return {:error, :agent_not_found} and fail workflow"
+        }
+      ],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "Duplicate incident_id in schema - Workflow has both string incident_id and incident_id_ref foreign key",
+          "file": "lib/agent_monitor/workflow.ex",
+          "line": null,
+          "requirement_id": "REQ-4.1-6",
+          "action_required": "Consolidate to single incident_id field"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "Database migration issue - Migration creates both incident_id (string) and incident_id_ref (foreign key)",
+          "file": "priv/repo/migrations/20240202120000_create_workflows.exs",
+          "line": null,
+          "requirement_id": "REQ-4.1-6",
+          "action_required": "Clean up migration to use single proper foreign key"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-3",
+          "description": "No agent timeout handling - @workflow_timeout defined but never used in execute_agent_step",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 16, 187-206,
+          "requirement_id": "REQ-4.1-1",
+          "action_required": "Implement timeout for individual agent steps"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-4",
+          "description": "Missing playbook support - Playbook integration incomplete, no workflow chain customization logic",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 220-232,
+          "requirement_id": "REQ-4.1-4",
+          "action_required": "Complete playbook workflow chain loading implementation"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "Hardcoded workflow chain - Default chain is hardcoded module attribute",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 15,
+          "requirement_id": "REQ-4.1-2",
+          "action_required": "Make configuration-driven"
+        },
+        {
+          "severity": "LOW",
+          "id": "LOW-2",
+          "description": "No exception handling - apply(agent_module, :execute, [context]) not wrapped in try/rescue",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 282,
+          "requirement_id": "REQ-4.1-1",
+          "action_required": "Add exception handling for agent execution"
+        },
+        {
+          "severity": "LOW",
+          "id": "LOW-3",
+          "description": "Monitor/verify agent confusion - Both map to Monitor.EndpointChecker",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 291, 294,
+          "requirement_id": "REQ-4.1-2",
+          "action_required": "Create separate verify agent module"
+        }
+      ]
+    },
+    "phase4-story4.2": {
+      "reviewed_at": "2026-02-02T21:45:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 5,
+        "medium": 4,
+        "low": 3
+      },
+      "critical_issues": [
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-1",
+          "description": "ConversationManager is unused - GenServer started but never called. WorkflowEngine queries DB directly instead",
+          "file": "lib/agent_monitor/application.ex, lib/agent_monitor/workflow_engine.ex",
+          "line": 12, 269-276",
+          "requirement_id": "REQ-4.2-1",
+          "action_required": "Either remove ConversationManager or make WorkflowEngine use it"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-2",
+          "description": "Missing embedding field in schema - Story data model shows embedding field for semantic search but schema has none",
+          "file": "lib/agent_monitor/conversation.ex, priv/repo/migrations/20240202120001_create_conversations.exs",
+          "line": null,
+          "requirement_id": "REQ-4.2-3",
+          "action_required": "Add embedding field to schema and migration, set up pgvector or similar"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-3",
+          "description": "No real LLM summarization - generate_summary only creates simple string summary, no actual LLM call",
+          "file": "lib/agent_monitor/conversation_manager.ex",
+          "line": 139-157,
+          "requirement_id": "REQ-4.2-4",
+          "action_required": "Implement actual LLM-based summarization with token awareness"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-4",
+          "description": "No token counting - Conversation has tokens field but ZERO logic to populate it. Cannot manage token limits",
+          "file": "lib/agent_monitor/conversation.ex",
+          "line": 14,
+          "requirement_id": "REQ-4.2-4",
+          "action_required": "Implement token counting logic when messages are added"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-5",
+          "description": "Zero test coverage - No tests for Conversation, ContextVersion, or ConversationManager",
+          "file": "test/",
+          "line": null,
+          "requirement_id": "REQ-4.2-1, REQ-4.2-6, REQ-4.2-7",
+          "action_required": "Add comprehensive test suite for conversation/context functionality"
+        }
+      ],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "No context window management - REQ-4.2-4 requires automatic summarization but only manual call exists",
+          "file": "lib/agent_monitor/conversation_manager.ex",
+          "line": null,
+          "requirement_id": "REQ-4.2-4",
+          "action_required": "Implement automatic context window management with configurable threshold"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "WorkflowEngine bypasses ConversationManager - Direct DB queries defeat GenServer abstraction",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 269-276",
+          "requirement_id": "REQ-4.2-1",
+          "action_required": "Make WorkflowEngine use ConversationManager.get_conversation_history API"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-3",
+          "description": "No topic-based search - Only keyword matching implemented, semantic search by topic missing",
+          "file": "lib/agent_monitor/conversation_manager.ex",
+          "line": 159-169,
+          "requirement_id": "REQ-4.2-3",
+          "action_required": "Implement topic extraction and semantic search using embeddings"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-4",
+          "description": "Agents cannot add to conversation - No mechanism for agents to append messages during execution",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": 192-199,
+          "requirement_id": "REQ-4.2-5",
+          "action_required": "Add public API for agents to append messages and integrate into workflow"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "Hardcoded summary threshold - Summary triggers at 10 messages, no configuration option",
+          "file": "lib/agent_monitor/conversation_manager.ex",
+          "line": 98,
+          "requirement_id": "REQ-4.2-4",
+          "action_required": "Make threshold configurable"
+        },
+        {
+          "severity": "LOW",
+          "id": "LOW-2",
+          "description": "Inefficient search - Loads ALL conversations then filters in Elixir instead of using DB query",
+          "file": "lib/agent_monitor/conversation_manager.ex",
+          "line": 122-127,
+          "requirement_id": "REQ-4.2-3",
+          "action_required": "Use database ILIKE or full-text search for better performance"
+        },
+        {
+          "severity": "LOW",
+          "id": "LOW-3",
+          "description": "No semantic search infrastructure - No vector similarity search or pgvector support",
+          "file": "lib/agent_monitor/conversation_manager.ex",
+          "line": null,
+          "requirement_id": "REQ-4.2-3",
+          "action_required": "Set up vector database and similarity search logic"
+        }
+      ]
+    },
+    "phase4-story4.3": {
+      "reviewed_at": "2026-02-02T21:55:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 5,
+        "medium": 2,
+        "low": 1
+      },
+      "critical_issues": [
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-1",
+          "description": "ParallelExecutor is dead code - GenServer started but NEVER called anywhere in codebase. WorkflowEngine doesn't use it at all",
+          "file": "lib/agent_monitor/application.ex, lib/agent_monitor/workflow_engine.ex",
+          "line": 11, null,
+          "requirement_id": "REQ-4.3-1",
+          "action_required": "Either remove ParallelExecutor or integrate it into WorkflowEngine"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-2",
+          "description": "No DAG support in Workflow schema - Workflow schema has no fields for DAG structure (branches, parallel structure, convergence points)",
+          "file": "lib/agent_monitor/workflow.ex",
+          "line": null,
+          "requirement_id": "REQ-4.3-2",
+          "action_required": "Add DAG fields to schema and design workflow structure for parallel branches"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-3",
+          "description": "No branch status tracking - Workflow schema has no branch_status field to track parallel branch completion",
+          "file": "lib/agent_monitor/workflow.ex",
+          "line": null,
+          "requirement_id": "REQ-4.3-7",
+          "action_required": "Add branch_status field to Workflow schema and tracking logic"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-4",
+          "description": "No way to define parallel branches - Playbook.get_workflow_chain only returns sequential list of atoms. No mechanism exists to define parallel branches or convergence points",
+          "file": "lib/agent_monitor/playbook.ex",
+          "line": 88-92,
+          "requirement_id": "REQ-4.3-2",
+          "action_required": "Add parallel branch definition capability to Playbook and workflow configuration"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-5",
+          "description": "Zero test coverage - No tests for ParallelExecutor, TaskSupervisor, or parallel execution logic",
+          "file": "test/",
+          "line": null,
+          "requirement_id": "REQ-4.3-1, REQ-4.3-2, REQ-4.3-3",
+          "action_required": "Add comprehensive test suite for parallel execution"
+        }
+      ],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "No sequential fallback configuration - REQ-4.3-6 requires configurable parallel/sequential execution but no config option exists",
+          "file": "lib/agent_monitor/config/",
+          "line": null,
+          "requirement_id": "REQ-4.3-6",
+          "action_required": "Add execution_mode configuration and sequential fallback logic"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "Playbook doesn't support parallel structure - Playbook schema only has steps array, no field for defining parallel branches or DAG structure",
+          "file": "lib/agent_monitor/playbook.ex",
+          "line": 14,
+          "requirement_id": "REQ-4.3-2",
+          "action_required": "Add parallel branch definition to Playbook schema"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "Limited error context in parallel execution - When branch fails, only error message is logged, no detailed error context or stack trace",
+          "file": "lib/agent_monitor/parallel_executor.ex",
+          "line": 82-83,
+          "requirement_id": "REQ-4.3-5",
+          "action_required": "Add detailed error logging and context capture"
+        }
+      ]
+    }
+  },
+  "requirement_status_updates": {
+    "REQ-4.1-1": "PARTIAL - Schema and engine exist but has critical bugs (duplicate changeset, agent interface mismatch, missing tests)",
+    "REQ-4.1-2": "PARTIAL - Default chain defined but agent modules don't exist",
+    "REQ-4.1-3": "PARTIAL - Output passing implemented but broken due to missing agents",
+    "REQ-4.1-4": "NOT_IMPLEMENTED - Playbook integration incomplete",
+    "REQ-4.1-5": "NOT_IMPLEMENTED - No dynamic add/remove functions",
+    "REQ-4.1-6": "PARTIAL - State persistence exists but has schema issues (duplicate incident_id)",
+    "REQ-4.1-7": "PARTIAL - Retry mechanism exists but untested",
+    "REQ-4.2-1": "PARTIAL - Schema exists and conversation loaded, but WorkflowEngine bypasses ConversationManager",
+    "REQ-4.2-2": "PARTIAL - Context structure correct but user_inputs always empty, no mechanism to provide user inputs",
+    "REQ-4.2-3": "PARTIAL - Filters for agent and time exist, but missing embedding field prevents semantic search, no topic search",
+    "REQ-4.2-4": "NOT_IMPLEMENTED - generate_summary creates simple string, not LLM-based. No token counting, no automatic context management",
+    "REQ-4.2-5": "NOT_IMPLEMENTED - No public API for agents to append messages. ConversationManager has add_message but never called",
+    "REQ-4.2-6": "PARTIAL - Migration and indexes exist, but HIGH issue: missing embedding field from story spec",
+    "REQ-4.2-7": "PARTIAL - Schema and snapshot creation exist, but ZERO test coverage",
+    "REQ-4.3-1": "NOT_IMPLEMENTED - ParallelExecutor exists but is DEAD CODE, never called by WorkflowEngine",
+    "REQ-4.3-2": "NOT_IMPLEMENTED - No DAG support in schema or workflow configuration. No mechanism to define parallel branches",
+    "REQ-4.3-3": "NOT_IMPLEMENTED - ParallelExecutor has aggregation logic but is dead code, never executed",
+    "REQ-4.3-4": "PARTIAL - create_isolated_context exists but untested dead code since ParallelExecutor never used",
+    "REQ-4.3-5": "PARTIAL - execute_branch has try/rescue for fault isolation but untested dead code",
+    "REQ-4.3-6": "NOT_IMPLEMENTED - No execution_mode configuration or sequential fallback mechanism",
+    "REQ-4.3-7": "NOT_IMPLEMENTED - Workflow schema has no branch_status field to track parallel branch completion",
+    "REQ-4.4-1": "NOT_IMPLEMENTED - Schema and create_changeset exist, but NO mechanism for agents to request approval. WorkflowEngine doesn't integrate with approval system at all",
+    "REQ-4.4-2": "NOT_IMPLEMENTED - Email and Slack modules exist but are NEVER used for approvals. ApprovalRequest.create is never called to send notifications",
+    "REQ-4.4-3": "NOT_IMPLEMENTED - NO LiveView exists. Only ApprovalController for approve/reject RESPONSES. No UI for displaying pending approvals",
+    "REQ-4.4-4": "PARTIAL - approve/reject changesets exist, but approvals are only created/approved via API, not triggered by agents during workflow execution",
+    "REQ-4.4-5": "PARTIAL - Schema has expires_at and is_expired helper, but NO background process to auto-reject expired approvals. Only manual expiry check in controller",
+    "REQ-4.4-6": "PARTIAL - Schema has approved_by and approved_at, and approve_changeset sets them, but no separate audit log exists or approval history query function",
+    "REQ-4.4-7": "NOT_IMPLEMENTED - COMPLETELY MISSING. NO whitelist table, no whitelist schema, no whitelist checking logic"
+  },
+  "requirement_status_updates": {
+    "REQ-4.1-1": "PARTIAL - Schema and engine exist but has critical bugs (duplicate changeset, agent interface mismatch, missing tests)",
+    "REQ-4.1-2": "PARTIAL - Default chain defined but agent modules don't exist",
+    "REQ-4.1-3": "PARTIAL - Output passing implemented but broken due to missing agents",
+    "REQ-4.1-4": "NOT_IMPLEMENTED - Playbook integration incomplete",
+    "REQ-4.1-5": "NOT_IMPLEMENTED - No dynamic add/remove functions",
+    "REQ-4.1-6": "PARTIAL - State persistence exists but has schema issues (duplicate incident_id)",
+    "REQ-4.1-7": "PARTIAL - Retry mechanism exists but untested",
+    "REQ-4.2-1": "PARTIAL - Schema exists and conversation loaded, but WorkflowEngine bypasses ConversationManager",
+    "REQ-4.2-2": "PARTIAL - Context structure correct but user_inputs always empty, no mechanism to provide user inputs",
+    "REQ-4.2-3": "PARTIAL - Filters for agent and time exist, but missing embedding field prevents semantic search, no topic search",
+    "REQ-4.2-4": "NOT_IMPLEMENTED - generate_summary creates simple string, not LLM-based. No token counting, no automatic context management",
+    "REQ-4.2-5": "NOT_IMPLEMENTED - No public API for agents to append messages. ConversationManager has add_message but never called",
+    "REQ-4.2-6": "PARTIAL - Migration and indexes exist, but HIGH issue: missing embedding field from story spec",
+    "REQ-4.2-7": "PARTIAL - Schema and snapshot creation exist, but ZERO test coverage",
+    "REQ-4.3-1": "NOT_IMPLEMENTED - ParallelExecutor exists but is DEAD CODE, never called by WorkflowEngine",
+    "REQ-4.3-2": "NOT_IMPLEMENTED - No DAG support in schema or workflow configuration. No mechanism to define parallel branches",
+    "REQ-4.3-3": "NOT_IMPLEMENTED - ParallelExecutor has aggregation logic but is dead code, never executed",
+    "REQ-4.3-4": "PARTIAL - create_isolated_context exists but untested dead code since ParallelExecutor never used",
+    "REQ-4.3-5": "PARTIAL - execute_branch has try/rescue for fault isolation but untested dead code",
+    "REQ-4.3-6": "NOT_IMPLEMENTED - No execution_mode configuration or sequential fallback mechanism",
+    "REQ-4.3-7": "NOT_IMPLEMENTED - Workflow schema has no branch_status field to track parallel branch completion",
+    "REQ-4.4-1": "NOT_IMPLEMENTED - Schema and create_changeset exist, but NO mechanism for agents to request approval. WorkflowEngine doesn't integrate with approval system at all",
+    "REQ-4.4-2": "NOT_IMPLEMENTED - Email and Slack modules exist but are NEVER used for approvals. ApprovalRequest.create is never called to send notifications",
+    "REQ-4.4-3": "NOT_IMPLEMENTED - NO LiveView exists. Only ApprovalController for approve/reject RESPONSES. No UI for displaying pending approvals",
+    "REQ-4.4-4": "PARTIAL - approve/reject changesets exist, but approvals are only created/approved via API, not triggered by agents during workflow execution",
+    "REQ-4.4-5": "PARTIAL - Schema has expires_at and is_expired helper, but NO background process to auto-reject expired approvals. Only manual expiry check in controller",
+    "REQ-4.4-6": "PARTIAL - Schema has approved_by and approved_at, and approve_changeset sets them, but no separate audit log exists or approval history query function",
+    "REQ-4.4-7": "NOT_IMPLEMENTED - COMPLETELY MISSING. NO whitelist table, no whitelist schema, no whitelist checking logic",
+    "REQ-4.5-1": "PARTIAL - MarketplaceLive UI exists and displays agents, but MarketplaceAgent schema doesn't exist. Agents are HARDCODED instead of loaded from database",
+    "REQ-4.5-2": "NOT_IMPLEMENTED - Marketplace has install event but only shows flash message. NO AgentRegistry module. NO database table for agent registry. NO actual installation logic or package download",
+    "REQ-4.5-3": "PARTIAL - HARDCODED agents include capabilities, but MarketplaceAgent schema doesn't exist. Dependencies field missing. No metadata validation",
+    "REQ-4.5-4": "PARTIAL - MarketplaceLive has capability filtering UI, but agents are HARDCODED instead of database query. NO AgentRegistry or MarketplaceAgent tables exist",
+    "REQ-4.5-5": "NOT_IMPLEMENTED - MarketplaceLive displays hardcoded ratings, but NO AgentReview schema, NO submit_review function, NO review database, NO mechanism for users to rate or review agents",
+    "REQ-4.5-6": "NOT_IMPLEMENTED - MarketplaceLive UI has no package sharing features. NO marketplace controller, NO upload functionality, MarketplaceAgent schema doesn't have package_url field",
+    "REQ-4.5-7": "NOT_IMPLEMENTED - MarketplaceAgent schema doesn't exist. NO marketplace controller or update checking logic. NO mechanism to check for new versions or update agents",
+    "REQ-5.1-1": "IMPLEMENTED - DashboardLive built with Phoenix LiveView",
+    "REQ-5.1-2": "IMPLEMENTED - Active workflows displayed in real-time with pub/sub updates",
+    "REQ-5.1-3": "IMPLEMENTED - ConversationLive subscribes to conversation pub/sub and streams messages",
+    "REQ-5.1-4": "PARTIAL - Dashboard displays metrics but agent_count is hardcoded (returns 3) and uptime is VM uptime not service uptime",
+    "REQ-5.1-5": "IMPLEMENTED - LiveView responds to workflow_update and incident_update server events",
+    "REQ-5.1-6": "IMPLEMENTED - Phoenix.PubSub used for efficient real-time updates",
+    "REQ-5.1-7": "PARTIAL - Responsive CSS classes used (md:, lg:) but no mobile testing documentation",
+    "REQ-5.2-1": "NOT_IMPLEMENTED - ZERO implementation. No UptimeMetric schema, no data collection, no graphing library in mix.exs",
+    "REQ-5.2-2": "NOT_IMPLEMENTED - No incident markers on uptime timeline (uptime graphs don't exist)",
+    "REQ-5.2-3": "NOT_IMPLEMENTED - No filtering UI or logic for service/agent/incident type (uptime graphs don't exist)",
+    "REQ-5.2-4": "NOT_IMPLEMENTED - No hover tooltips or click-to-jump (uptime graphs don't exist)",
+    "REQ-5.2-5": "NOT_IMPLEMENTED - No uptime comparison feature (uptime graphs don't exist)",
+    "REQ-5.2-6": "NOT_IMPLEMENTED - No CSV export functionality",
+    "REQ-5.2-7": "NOT_IMPLEMENTED - No caching for historical uptime data",
+    "REQ-5.3-1": "IMPLEMENTED - ConversationLive shows chat-style interface",
+    "REQ-5.3-2": "IMPLEMENTED - Messages color-coded by agent using agent_color function",
+    "REQ-5.3-3": "NOT_IMPLEMENTED - ZERO flow diagram implementation. No D3, Cytoscape, or Mermaid integration",
+    "REQ-5.3-4": "NOT_IMPLEMENTED - No graph visualization since flow diagram doesn't exist",
+    "REQ-5.3-5": "NOT_IMPLEMENTED - Can't click nodes to show conversation (no diagram exists)",
+    "REQ-5.3-6": "NOT_IMPLEMENTED - No collapse/expand functionality for conversation threads",
+    "REQ-5.3-7": "PARTIAL - Filter by agent implemented but missing search by time and keyword",
+    "REQ-5.4-1": "IMPLEMENTED - IncidentLive shows list view with status, severity, and assignee",
+    "REQ-5.4-2": "IMPLEMENTED - IncidentDetailLive shows incident details with comment form",
+    "REQ-5.4-3": "IMPLEMENTED - IncidentController.create creates incidents, Incident schema supports manual creation",
+    "REQ-5.4-4": "PARTIAL - Incident has assigned_to field and assign_changeset, but assign modal in UI has no save handler",
+    "REQ-5.4-5": "IMPLEMENTED - Incident schema defines 5 states (open, in_progress, resolved, closed, reopened) with valid_transitions",
+    "REQ-5.4-6": "IMPLEMENTED - Incident schema defines 4 severity levels (P1, P2, P3, P4)",
+    "REQ-5.4-7": "PARTIAL - Comments schema exists but NO database insert in add_comment handler. No attachments schema or implementation",
+    "REQ-5.4-8": "PARTIAL - Incident has playbook_id foreign key but no display or link in UI",
+    "REQ-5.5-1": "PARTIAL - PlaybookEditorLive UI exists but save button doesn't actually save to database",
+    "REQ-5.5-2": "IMPLEMENTED - Playbook schema defines workflow chain (steps array), agent-specific instructions, approval requirements",
+    "REQ-5.5-3": "PARTIAL - Playbook has incident_type and service fields but no organization UI or filtering",
+    "REQ-5.5-4": "PARTIAL - Playbook has version field and fork_changeset function but no versioning UI or fork functionality in editor",
+    "REQ-5.5-5": "NOT_IMPLEMENTED - Preview Workflow button exists but no handler. No actual preview logic",
+    "REQ-5.5-6": "PARTIAL - Playbook has variables schema but no sharing implementation. JSON export button does nothing",
+    "REQ-5.5-7": "PARTIAL - Playbook schema supports variables and interpolation logic exists, but no variable management UI (add/edit/delete)"
+  },
+  "code_review_findings": {
+    "phase5-story5.1": {
+      "reviewed_at": "2026-02-02T22:30:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 0,
+        "medium": 3,
+        "low": 2
+      },
+      "critical_issues": [],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "Agent count hardcoded - count_agents_running returns 3 instead of actually counting running agents",
+          "file": "lib/agent_monitor_web/live/dashboard_live.ex",
+          "line": 61,
+          "requirement_id": "REQ-5.1-4",
+          "action_required": "Implement actual agent counting by querying running agents from WorkflowEngine or TaskSupervisor"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "Uptime is VM uptime, not service uptime - Shows Erlang VM uptime, doesn't track service uptime for graphs",
+          "file": "lib/agent_monitor_web/live/dashboard_live.ex",
+          "line": 53-58",
+          "requirement_id": "REQ-5.1-4",
+          "action_required": "Track actual service uptime across monitored endpoints, not just VM uptime"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-3",
+          "description": "Missing agent status pub/sub - No pub/sub channel for agent status updates, only workflows and incidents",
+          "file": "lib/agent_monitor_web/live/dashboard_live.ex",
+          "line": 11-12",
+          "requirement_id": "REQ-5.1-4",
+          "action_required": "Add agent status pub/sub channel and subscribe in DashboardLive to update agent count in real-time"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "No error handling in pub/sub - If subscription fails, no fallback or user notification",
+          "file": "lib/agent_monitor_web/live/dashboard_live.ex",
+          "line": 10-13",
+          "requirement_id": "REQ-5.1-6",
+          "action_required": "Add try/rescue around pub/sub subscriptions and handle failures gracefully"
+        },
+        {
+          "severity": "LOW",
+          "id": "LOW-2",
+          "description": "No mobile testing documentation - Responsive classes used but no test verification",
+          "file": "test/",
+          "line": null,
+          "requirement_id": "REQ-5.1-7",
+          "action_required": "Add responsive design tests and verify dashboard works on mobile/tablet breakpoints"
+        }
+      ]
+    },
+    "phase5-story5.2": {
+      "reviewed_at": "2026-02-02T22:35:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 3,
+        "medium": 3,
+        "low": 1
+      },
+      "critical_issues": [
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-1",
+          "description": "No UptimeMetric schema - Story requires UptimeMetric schema but ZERO implementation exists. No migration, no schema, no code",
+          "file": "lib/agent_monitor/",
+          "line": null,
+          "requirement_id": "REQ-5.2-1",
+          "action_required": "Create UptimeMetric Ecto schema with fields: timestamp, service_id, status, response_time_ms, incident_id"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-2",
+          "description": "No uptime data collection - No code to record uptime metrics over time. Can't graph what you don't collect",
+          "file": "lib/agent_monitor/",
+          "line": null,
+          "requirement_id": "REQ-5.2-1",
+          "action_required": "Implement background process to collect and store uptime metrics at regular intervals (hourly/daily rollups)"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-3",
+          "description": "No graphing library - mix.exs has NO charting library (Chart.js, Recharts, etc.). Graphs IMPOSSIBLE without one",
+          "file": "mix.exs",
+          "line": 39-62,
+          "requirement_id": "REQ-5.2-1",
+          "action_required": "Add charting library dependency (Recharts, Chart.js, or similar) and integrate with Phoenix LiveView"
+        }
+      ],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "No incident markers on timeline - No code to plot incidents on uptime graph",
+          "file": "lib/agent_monitor_web/",
+          "line": null,
+          "requirement_id": "REQ-5.2-2",
+          "action_required": "Add incident marker visualization on uptime graphs with click-to-navigate to incident details"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "No CSV export - REQ-5.2-6 requires CSV export but ZERO export functionality",
+          "file": "lib/agent_monitor_web/",
+          "line": null,
+          "requirement_id": "REQ-5.2-6",
+          "action_required": "Implement CSV export endpoint and button in uptime graph view"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-3",
+          "description": "No caching - REQ-5.2-7 requires caching for fast loading but no caching implementation",
+          "file": "lib/agent_monitor/",
+          "line": null,
+          "requirement_id": "REQ-5.2-7",
+          "action_required": "Implement caching layer for uptime metrics (ETS, Cachex, or similar) to speed up historical data loading"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "No comparison views - REQ-5.2-5 requires current vs previous period comparison but not implemented",
+          "file": "lib/agent_monitor_web/",
+          "line": null,
+          "requirement_id": "REQ-5.2-5",
+          "action_required": "Add uptime comparison feature to show current vs previous period metrics"
+        }
+      ]
+    },
+    "phase5-story5.3": {
+      "reviewed_at": "2026-02-02T22:40:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 1,
+        "medium": 2,
+        "low": 1
+      },
+      "critical_issues": [
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-1",
+          "description": "No flow diagram view - Story requires visual graph of agent workflow with nodes/edges, but ZERO implementation. No D3, no Cytoscape, no Mermaid",
+          "file": "lib/agent_monitor_web/",
+          "line": null,
+          "requirement_id": "REQ-5.3-3, REQ-5.3-4",
+          "action_required": "Add flow diagram visualization using D3.js, Cytoscape.js, or Mermaid.js. Implement nodes (agents) and edges (handoffs)"
+        }
+      ],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "No search by time/keyword - Story REQ-5.3-7 requires search but filters only by agent",
+          "file": "lib/agent_monitor_web/live/conversation_live.ex",
+          "line": 32-37,
+          "requirement_id": "REQ-5.3-7",
+          "action_required": "Add search functionality for keyword search and time range filtering in conversation view"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "No collapse/expand for threads - REQ-5.3-6 requires thread collapse but NO implementation",
+          "file": "lib/agent_monitor_web/live/conversation_live.ex",
+          "line": 29-49,
+          "requirement_id": "REQ-5.3-6",
+          "action_required": "Add collapse/expand functionality for conversation threads or message groups"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "No role badge in conversation - Story mentions role badges but implementation shows them",
+          "file": "lib/agent_monitor_web/templates/conversation/show.html.heex",
+          "line": 39-41,
+          "requirement_id": "REQ-5.3-2",
+          "action_required": "None - role_badge is implemented correctly"
+        }
+      ]
+    },
+    "phase5-story5.4": {
+      "reviewed_at": "2026-02-02T22:45:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 0,
+        "medium": 4,
+        "low": 1
+      },
+      "critical_issues": [],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "Comment adding broken - handle_event('add_comment') updates socket but NO database insert",
+          "file": "lib/agent_monitor_web/live/incident_detail_live.ex",
+          "line": 21-32,
+          "requirement_id": "REQ-5.4-7",
+          "action_required": "Add actual database insert for comments using AgentMonitor.Comment.changeset and Repo.insert"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "Assign modal has no save - show_assign_modal displays modal but NO submit handler or save logic",
+          "file": "lib/agent_monitor_web/live/incident_detail_live.ex",
+          "line": 35-42,
+          "requirement_id": "REQ-5.4-4",
+          "action_required": "Add assign_incident event handler to save assignment changes using Incident.assign_changeset"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-3",
+          "description": "No attachments support - Story REQ-5.4-7 requires attachments but ZERO implementation",
+          "file": "lib/agent_monitor/",
+          "line": null,
+          "requirement_id": "REQ-5.4-7",
+          "action_required": "Create Attachment schema with fields: incident_id, filename, content_type, file_path, uploaded_at. Add file upload handling in IncidentDetailLive"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-4",
+          "description": "No severity transitions - Incident state machine exists but NO validation for severity changes",
+          "file": "lib/agent_monitor/incident.ex",
+          "line": 100-109,
+          "requirement_id": "REQ-5.4-6",
+          "action_required": "Add severity transition validation logic similar to status transitions. Prevent invalid severity changes"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "No playbook link validation - Incident has playbook_id but no display or link in detail view",
+          "file": "lib/agent_monitor_web/templates/incident/show.html.heex",
+          "line": null,
+          "requirement_id": "REQ-5.4-8",
+          "action_required": "Display linked playbook in incident detail view with link to playbook details"
+        }
+      ]
+    },
+    "phase5-story5.5": {
+      "reviewed_at": "2026-02-02T22:50:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 1,
+        "medium": 4,
+        "low": 1
+      },
+      "critical_issues": [
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-1",
+          "description": "Save doesn't actually save - handle_event('save') only puts flash message, NO database update. Playbook changes are LOST",
+          "file": "lib/agent_monitor_web/live/playbook_editor_live.ex",
+          "line": 56-58,
+          "requirement_id": "REQ-5.5-1",
+          "action_required": "Implement actual save logic using AgentMonitor.Playbook.changeset and Repo.update"
+        }
+      ],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "No playbook versioning - Story REQ-5.5-4 requires versioning/forking but only version field exists",
+          "file": "lib/agent_monitor/playbook.ex",
+          "line": 56-69,
+          "requirement_id": "REQ-5.5-4",
+          "action_required": "Implement version history tracking. Add fork_changeset usage in PlaybookEditorLive. Create version comparison UI"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "No playbook sharing - REQ-5.5-6 requires sharing with users/teams but ZERO implementation",
+          "file": "lib/agent_monitor/playbook.ex",
+          "line": null,
+          "requirement_id": "REQ-5.5-6",
+          "action_required": "Add shared_with field to Playbook schema, implement sharing UI, add permission checking logic"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-3",
+          "description": "No workflow preview - Template has Preview Workflow button but NO handler or preview logic",
+          "file": "lib/agent_monitor_web/templates/playbook/edit.html.heex",
+          "line": 127-129,
+          "requirement_id": "REQ-5.5-5",
+          "action_required": "Add preview_workflow event handler to display simulated workflow execution without actually running agents"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-4",
+          "description": "Variable management missing - Template displays variables but NO add/edit/delete functionality",
+          "file": "lib/agent_monitor_web/live/playbook_editor_live.ex",
+          "line": null,
+          "requirement_id": "REQ-5.5-7",
+          "action_required": "Add variable CRUD operations (add_variable, edit_variable, delete_variable) to PlaybookEditorLive"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "JSON export button does nothing - Template has button but NO handler",
+          "file": "lib/agent_monitor_web/templates/playbook/edit.html.heex",
+          "line": 131-134,
+          "requirement_id": "REQ-5.5-6",
+          "action_required": "Add export_json event handler to download playbook as JSON file"
+        }
+      ]
+    },
+    "phase4-story4.5": {
+      "reviewed_at": "2026-02-02T22:20:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 5,
+        "medium": 2,
+        "low": 1
+      },
+      "critical_issues": [
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-1",
+          "description": "No MarketplaceAgent schema - Story requires MarketplaceAgent Ecto schema but this schema doesn't exist anywhere",
+          "file": "lib/agent_monitor/",
+          "line": null,
+          "requirement_id": "REQ-4.5-1",
+          "action_required": "Create MarketplaceAgent Ecto schema with fields: name, description, author, version, capabilities, package_url, rating, downloads, is_installed"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-2",
+          "description": "No AgentRegistry module - REQ-4.5-2 requires AgentRegistry for installing from marketplace. Module doesn't exist",
+          "file": "lib/agent_monitor/",
+          "line": null,
+          "requirement_id": "REQ-4.5-2",
+          "action_required": "Create AgentRegistry module with download_agent, install_agent, and registry management functions"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-3",
+          "description": "No database table for marketplace agents - No migration exists for marketplace_agents or agent_registry table",
+          "file": "priv/repo/migrations/",
+          "line": null,
+          "requirement_id": "REQ-4.5-1, REQ-4.5-2",
+          "action_required": "Create migration for marketplace_agents table with required fields and indexes"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-4",
+          "description": "No package download or installation - REQ-4.5-6 requires agents shared as packages but there's ZERO logic to download from package_url or install agents",
+          "file": "lib/agent_monitor_web/live/marketplace_live.ex",
+          "line": 29-31,
+          "requirement_id": "REQ-4.5-6",
+          "action_required": "Implement package download from package_url, module parsing for Elixir packages, webhook support for external services, and installation into agent registry"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-5",
+          "description": "No rating/review functionality - REQ-4.5-5 requires agents can be rated and reviewed but there's NO AgentReview schema, submit_review function, or review database",
+          "file": "lib/agent_monitor/",
+          "line": null,
+          "requirement_id": "REQ-4.5-5",
+          "action_required": "Create AgentReview Ecto schema with fields: agent_id, user_id, rating, review_text, submitted_at. Implement submit_review function. Calculate average rating. Display reviews in marketplace UI"
+        }
+      ],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "No version/update checking - REQ-4.5-7 requires versioning and updates but there's NO mechanism to check for new versions or update agents",
+          "file": "lib/agent_monitor/",
+          "line": null,
+          "requirement_id": "REQ-4.5-7",
+          "action_required": "Implement version comparison logic, create update_agent function, display available updates in marketplace"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "No marketplace controller - Marketplace only has LiveView. No controller to handle API endpoints like package downloads, version checking, or review submission",
+          "file": "lib/agent_monitor_web/",
+          "line": null,
+          "requirement_id": "REQ-4.5-2, REQ-4.5-6, REQ-4.5-7",
+          "action_required": "Create MarketplaceController with actions for package upload, download, version management, and review submission"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "Hardcoded marketplace data - All marketplace agents are HARDCODED in MarketplaceLive instead of loaded from database. Makes filtering and installation impossible",
+          "file": "lib/agent_monitor_web/live/marketplace_live.ex",
+          "line": 39-93,
+          "requirement_id": "REQ-4.5-1, REQ-4.5-2, REQ-4.5-3, REQ-4.5-4",
+          "action_required": "Create migration to store marketplace agents. Load agents from database in MarketplaceLive. Replace hardcoded list with database query"
+        }
+      ]
+    }
+  },
+  "requirement_mappings": {
+    "phase4-story4.1": {
+      "title": "Agent chaining (monitor → investigate → remediate → verify)",
+      "requirements": [
+        {
+          "id": "REQ-4.1-1",
+          "description": "Agent workflow engine supports sequential agent chaining",
+          "mapped_to_task": "Feature 4.1-1: Implement sequential agent chaining workflow engine"
+        },
+        {
+          "id": "REQ-4.1-2",
+          "description": "Default workflow chain: monitor_agent → investigate_agent → remediate_agent → verify_agent",
+          "mapped_to_task": "Feature 4.1-2: Configure default workflow chain for agent orchestration"
+        },
+        {
+          "id": "REQ-4.1-3",
+          "description": "Output from each agent is passed as input to the next agent",
+          "mapped_to_task": "Feature 4.1-3: Implement output-to-input passing between sequential agents"
+        },
+        {
+          "id": "REQ-4.1-4",
+          "description": "Workflow can be customized per incident type or playbook",
+          "mapped_to_task": "Feature 4.1-4: Add workflow customization per incident type or playbook"
+        },
+        {
+          "id": "REQ-4.1-5",
+          "description": "Agents can be added/removed from workflow chain dynamically",
+          "mapped_to_task": "Feature 4.1-5: Implement dynamic agent add/remove in workflow chain"
+        },
+        {
+          "id": "REQ-4.1-6",
+          "description": "Workflow state is persisted (pending, in_progress, completed, failed)",
+          "mapped_to_task": "Feature 4.1-6: Create workflow state persistence with status tracking"
+        },
+        {
+          "id": "REQ-4.1-7",
+          "description": "Failed workflows can be retried from the failed agent",
+          "mapped_to_task": "Feature 4.1-7: Implement retry mechanism from failed workflow agent"
+        }
+      ]
+    },
+    "phase4-story4.2": {
+      "title": "Conversation history & context passing",
+      "requirements": [
+        {
+          "id": "REQ-4.2-1",
+          "description": "Each agent has access to full conversation history from the workflow",
+          "mapped_to_task": "Feature 4.2-1: Provide full conversation history access to all agents"
+        },
+        {
+          "id": "REQ-4.2-2",
+          "description": "Context includes: previous agent outputs, incident data, system state, user inputs",
+          "mapped_to_task": "Feature 4.2-2: Aggregate comprehensive context for agents"
+        },
+        {
+          "id": "REQ-4.2-3",
+          "description": "Conversation history is queryable (by agent, by time, by topic)",
+          "mapped_to_task": "Feature 4.2-3: Implement queryable conversation history interface"
+        },
+        {
+          "id": "REQ-4.2-4",
+          "description": "Context can be summarized for long conversations (to manage token limits)",
+          "mapped_to_task": "Feature 4.2-4: Add conversation summarization for token management"
+        },
+        {
+          "id": "REQ-4.2-5",
+          "description": "Agents can add to conversation history during execution",
+          "mapped_to_task": "Feature 4.2-5: Enable agents to append to conversation history"
+        },
+        {
+          "id": "REQ-4.2-6",
+          "description": "Conversation history is persisted to the database",
+          "mapped_to_task": "Feature 4.2-6: Implement database persistence for conversation history"
+        },
+        {
+          "id": "REQ-4.2-7",
+          "description": "Context is versioned (immutable snapshots for each workflow step)",
+          "mapped_to_task": "Feature 4.2-7: Add context versioning with immutable snapshots"
+        }
+      ]
+    },
+    "phase4-story4.3": {
+      "title": "Parallel agent execution",
+      "requirements": [
+        {
+          "id": "REQ-4.3-1",
+          "description": "Workflow engine supports parallel execution of independent agents",
+          "mapped_to_task": "Feature 4.3-1: Implement parallel execution engine for independent agents"
+        },
+        {
+          "id": "REQ-4.3-2",
+          "description": "Workflow DAG can have multiple branches that run concurrently",
+          "mapped_to_task": "Feature 4.3-2: Support concurrent branches in workflow DAG"
+        },
+        {
+          "id": "REQ-4.3-3",
+          "description": "Results from parallel agents are aggregated at convergence points",
+          "mapped_to_task": "Feature 4.3-3: Implement result aggregation at convergence points"
+        },
+        {
+          "id": "REQ-4.3-4",
+          "description": "Parallel agents have isolated contexts (no shared state during execution)",
+          "mapped_to_task": "Feature 4.3-4: Ensure isolated contexts for parallel agents"
+        },
+        {
+          "id": "REQ-4.3-5",
+          "description": "Agent failures in one branch don't stop other branches",
+          "mapped_to_task": "Feature 4.3-5: Implement fault isolation for parallel agent branches"
+        },
+        {
+          "id": "REQ-4.3-6",
+          "description": "Parallel execution is configurable (sequential fallback available)",
+          "mapped_to_task": "Feature 4.3-6: Add configurable parallel execution with sequential fallback"
+        },
+        {
+          "id": "REQ-4.3-7",
+          "description": "Workflow state tracks which branches are complete/in-progress",
+          "mapped_to_task": "Feature 4.3-7: Track branch completion status in workflow state"
+        }
+      ]
+    },
+    "phase4-story4.4": {
+      "title": "Human-in-the-loop approval",
+      "requirements": [
+        {
+          "id": "REQ-4.4-1",
+          "description": "Agents can request human approval for sensitive actions",
+          "mapped_to_task": "Feature 4.4-1: Implement approval request mechanism for agent actions"
+        },
+        {
+          "id": "REQ-4.4-2",
+          "description": "Approval requests are sent via configured channel (email, Slack, UI notification)",
+          "mapped_to_task": "Feature 4.4-2: Configure approval notification channels (email, Slack, UI)"
+        },
+        {
+          "id": "REQ-4.4-3",
+          "description": "Approval UI shows: agent action description, context, risk level, estimated impact",
+          "mapped_to_task": "Feature 4.4-3: Create approval UI with action details and risk assessment"
+        },
+        {
+          "id": "REQ-4.4-4",
+          "description": "Approvals can be: approve, reject, or approve with modifications",
+          "mapped_to_task": "Feature 4.4-4: Support approve, reject, and approve with modifications"
+        },
+        {
+          "id": "REQ-4.4-5",
+          "description": "Approval workflow is time-boxed (auto-reject if no response within timeout)",
+          "mapped_to_task": "Feature 4.4-5: Implement time-boxed approval workflow with auto-reject"
+        },
+        {
+          "id": "REQ-4.4-6",
+          "description": "Approval history is logged for audit purposes",
+          "mapped_to_task": "Feature 4.4-6: Log approval history for audit trail"
+        },
+        {
+          "id": "REQ-4.4-7",
+          "description": "Approval can be pre-approved for certain agents or incident types (whitelist)",
+          "mapped_to_task": "Feature 4.4-7: Implement pre-approval whitelist for trusted agents/incidents"
+        }
+      ]
+    },
+    "phase4-story4.5": {
+      "title": "Agent marketplace",
+      "requirements": [
+        {
+          "id": "REQ-4.5-1",
+          "description": "Agent marketplace UI lists available agents with descriptions and capabilities",
+          "mapped_to_task": "Feature 4.5-1: Create agent marketplace UI listing"
+        },
+        {
+          "id": "REQ-4.5-2",
+          "description": "Agents can be installed from the marketplace into local agent registry",
+          "mapped_to_task": "Feature 4.5-2: Implement agent installation from marketplace to registry"
+        },
+        {
+          "id": "REQ-4.5-3",
+          "description": "Agent metadata includes: name, description, author, version, capabilities, dependencies",
+          "mapped_to_task": "Feature 4.5-3: Define agent metadata schema (name, description, author, version, capabilities, dependencies)"
+        },
+        {
+          "id": "REQ-4.5-4",
+          "description": "Marketplace supports filtering by capability (monitoring, investigation, remediation, verification)",
+          "mapped_to_task": "Feature 4.5-4: Add capability filtering in marketplace"
+        },
+        {
+          "id": "REQ-4.5-5",
+          "description": "Agents can be rated and reviewed by users",
+          "mapped_to_task": "Feature 4.5-5: Implement agent rating and review system"
+        },
+        {
+          "id": "REQ-4.5-6",
+          "description": "Agents can be shared as packages (Elixir modules or external services)",
+          "mapped_to_task": "Feature 4.5-6: Support agent package sharing (Elixir modules or webhooks)"
+        },
+        {
+          "id": "REQ-4.5-7",
+          "description": "Marketplace agents can be versioned and updated",
+          "mapped_to_task": "Feature 4.5-7: Implement agent versioning and update mechanism"
+        }
+      ]
+    },
+    "phase5-story5.1": {
+      "title": "Phoenix LiveView for real-time UI",
+      "requirements": [
+        {
+          "id": "REQ-5.1-1",
+          "description": "Dashboard is built with Phoenix LiveView for real-time updates",
+          "mapped_to_task": "Feature 5.1-1: Build dashboard with Phoenix LiveView for real-time updates"
+        },
+        {
+          "id": "REQ-5.1-2",
+          "description": "Active workflows are displayed in real-time (status updates automatically)",
+          "mapped_to_task": "Feature 5.1-2: Display active workflows with real-time status updates"
+        },
+        {
+          "id": "REQ-5.1-3",
+          "description": "Agent conversations stream live as they happen",
+          "mapped_to_task": "Feature 5.1-3: Stream agent conversations in real-time"
+        },
+        {
+          "id": "REQ-5.1-4",
+          "description": "System metrics (uptime, active incidents, agent status) update in real-time",
+          "mapped_to_task": "Feature 5.1-4: Update system metrics in real-time (uptime, incidents, agent status)"
+        },
+        {
+          "id": "REQ-5.1-5",
+          "description": "UI responds to server events (agent started, workflow completed, approval requested)",
+          "mapped_to_task": "Feature 5.1-5: Respond to server events (agent started, workflow completed, approval requested)"
+        },
+        {
+          "id": "REQ-5.1-6",
+          "description": "LiveView uses pub/sub for efficient updates (no polling)",
+          "mapped_to_task": "Feature 5.1-6: Implement pub/sub for efficient LiveView updates"
+        },
+        {
+          "id": "REQ-5.1-7",
+          "description": "Dashboard is responsive and works on mobile/tablet",
+          "mapped_to_task": "Feature 5.1-7: Make dashboard responsive for mobile/tablet"
+        }
+      ]
+    },
+    "phase5-story5.2": {
+      "title": "Historical uptime graphs",
+      "requirements": [
+        {
+          "id": "REQ-5.2-1",
+          "description": "Uptime graphs show system availability over time (hourly, daily, weekly, monthly)",
+          "mapped_to_task": "Feature 5.2-1: Create uptime graphs with hourly/daily/weekly/monthly views"
+        },
+        {
+          "id": "REQ-5.2-2",
+          "description": "Incident markers are plotted on the uptime timeline",
+          "mapped_to_task": "Feature 5.2-2: Plot incident markers on uptime timeline"
+        },
+        {
+          "id": "REQ-5.2-3",
+          "description": "Graphs can be filtered by service, agent, or incident type",
+          "mapped_to_task": "Feature 5.2-3: Add filtering by service, agent, or incident type"
+        },
+        {
+          "id": "REQ-5.2-4",
+          "description": "Hover tooltips show incident details (when clicked, jump to incident details)",
+          "mapped_to_task": "Feature 5.2-4: Add hover tooltips with incident details and click-to-jump"
+        },
+        {
+          "id": "REQ-5.2-5",
+          "description": "Support for uptime comparison (current vs. previous period)",
+          "mapped_to_task": "Feature 5.2-5: Implement uptime comparison (current vs previous period)"
+        },
+        {
+          "id": "REQ-5.2-6",
+          "description": "Export data as CSV for external analysis",
+          "mapped_to_task": "Feature 5.2-6: Add CSV export for external analysis"
+        },
+        {
+          "id": "REQ-5.2-7",
+          "description": "Graphs use caching for fast loading of historical data",
+          "mapped_to_task": "Feature 5.2-7: Implement caching for fast historical data loading"
+        }
+      ]
+    },
+    "phase5-story5.3": {
+      "title": "Agent conversation visualization",
+      "requirements": [
+        {
+          "id": "REQ-5.3-1",
+          "description": "Conversation view shows chat-style interface (like messaging app)",
+          "mapped_to_task": "Feature 5.3-1: Create chat-style conversation view"
+        },
+        {
+          "id": "REQ-5.3-2",
+          "description": "Messages are color-coded by agent (different agents have different colors)",
+          "mapped_to_task": "Feature 5.3-2: Color-code messages by agent"
+        },
+        {
+          "id": "REQ-5.3-3",
+          "description": "Flow diagram view shows agent workflow as a visual graph",
+          "mapped_to_task": "Feature 5.3-3: Create flow diagram view of agent workflow"
+        },
+        {
+          "id": "REQ-5.3-4",
+          "description": "Nodes in the diagram represent agents, edges represent handoffs",
+          "mapped_to_task": "Feature 5.3-4: Implement nodes as agents, edges as handoffs"
+        },
+        {
+          "id": "REQ-5.3-5",
+          "description": "Clicking a node shows that agent's conversation and output",
+          "mapped_to_task": "Feature 5.3-5: Add click-to-show conversation for agent nodes"
+        },
+        {
+          "id": "REQ-5.3-6",
+          "description": "Support for collapsing/expanding conversation threads",
+          "mapped_to_task": "Feature 5.3-6: Add collapse/expand for conversation threads"
+        },
+        {
+          "id": "REQ-5.3-7",
+          "description": "Search/filter conversations by agent, time, or keyword",
+          "mapped_to_task": "Feature 5.3-7: Implement search/filter by agent, time, or keyword"
+        }
+      ]
+    },
+    "phase5-story5.4": {
+      "title": "Incident management",
+      "requirements": [
+        {
+          "id": "REQ-5.4-1",
+          "description": "Incident list view shows all incidents with status, severity, and assignee",
+          "mapped_to_task": "Feature 5.4-1: Create incident list view with status, severity, assignee"
+        },
+        {
+          "id": "REQ-5.4-2",
+          "description": "Incident detail view shows full workflow, agent conversations, and timeline",
+          "mapped_to_task": "Feature 5.4-2: Create incident detail view with workflow, conversations, timeline"
+        },
+        {
+          "id": "REQ-5.4-3",
+          "description": "Incidents can be created manually or auto-created by agents",
+          "mapped_to_task": "Feature 5.4-3: Support manual and auto-incident creation"
+        },
+        {
+          "id": "REQ-5.4-4",
+          "description": "Incidents can be assigned to users or teams",
+          "mapped_to_task": "Feature 5.4-4: Implement incident assignment to users or teams"
+        },
+        {
+          "id": "REQ-5.4-5",
+          "description": "Incident states: open, in_progress, resolved, closed, reopened",
+          "mapped_to_task": "Feature 5.4-5: Define incident state machine (open, in_progress, resolved, closed, reopened)"
+        },
+        {
+          "id": "REQ-5.4-6",
+          "description": "Severity levels: P1 (critical), P2 (high), P3 (medium), P4 (low)",
+          "mapped_to_task": "Feature 5.4-6: Implement severity levels (P1, P2, P3, P4)"
+        },
+        {
+          "id": "REQ-5.4-7",
+          "description": "Incidents support comments, attachments, and related incident linking",
+          "mapped_to_task": "Feature 5.4-7: Add comments, attachments, and related incidents"
+        },
+        {
+          "id": "REQ-5.4-8",
+          "description": "Incidents can be linked to playbooks for remediation guidance",
+          "mapped_to_task": "Feature 5.4-8: Link incidents to playbooks for remediation guidance"
+        }
+      ]
+    },
+    "phase5-story5.5": {
+      "title": "Playbook editor",
+      "requirements": [
+        {
+          "id": "REQ-5.5-1",
+          "description": "Playbook editor UI for creating playbook steps",
+          "mapped_to_task": "Feature 5.5-1: Create playbook editor UI for creating steps"
+        },
+        {
+          "id": "REQ-5.5-2",
+          "description": "Playbooks define: workflow chain, agent-specific instructions, approval requirements",
+          "mapped_to_task": "Feature 5.5-2: Define playbooks with workflow chain, instructions, approvals"
+        },
+        {
+          "id": "REQ-5.5-3",
+          "description": "Playbooks can be organized by incident type or service",
+          "mapped_to_task": "Feature 5.5-3: Organize playbooks by incident type or service"
+        },
+        {
+          "id": "REQ-5.5-4",
+          "description": "Playbook editor supports versioning (playbooks can be forked and updated)",
+          "mapped_to_task": "Feature 5.5-4: Implement playbook versioning with fork and update"
+        },
+        {
+          "id": "REQ-5.5-5",
+          "description": "Playbooks can be previewed (test workflow without running agents)",
+          "mapped_to_task": "Feature 5.5-5: Add playbook preview (test workflow without running agents)"
+        },
+        {
+          "id": "REQ-5.5-6",
+          "description": "Playbooks can be shared with other users/teams",
+          "mapped_to_task": "Feature 5.5-6: Support playbook sharing with users/teams"
+        },
+        {
+          "id": "REQ-5.5-7",
+          "description": "Playbooks support variables (placeholders for dynamic values like service names)",
+          "mapped_to_task": "Feature 5.5-7: Implement playbook variables for dynamic values"
+        }
+      ]
+    },
+    "phase4-story4.4": {
+      "reviewed_at": "2026-02-02T22:05:00Z",
+      "reviewer": "AI Code Reviewer",
+      "status": "in_progress",
+      "total_issues": {
+        "high": 5,
+        "medium": 2,
+        "low": 1
+      },
+      "critical_issues": [
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-1",
+          "description": "Agents cannot request approval - NO mechanism exists for agents to request approval. WorkflowEngine has zero integration with approval system",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": null,
+          "requirement_id": "REQ-4.4-1",
+          "action_required": "Add approval checkpoint in WorkflowEngine execute_agent_step. Integrate approval system with workflow execution"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-2",
+          "description": "No notification channels for approvals - Email and Slack modules exist but are NEVER used for approval requests. Approvals are NEVER sent via any channel",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": null,
+          "requirement_id": "REQ-4.4-2",
+          "action_required": "Implement notification dispatch when ApprovalRequest is created. Send via email, Slack, and PubSub UI notification"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-3",
+          "description": "No approval UI - NO LiveView or page exists to display pending approvals. Only ApprovalController which handles approve/reject RESPONSES",
+          "file": "lib/agent_monitor_web/",
+          "line": null,
+          "requirement_id": "REQ-4.4-3",
+          "action_required": "Create ApprovalLive LiveView to display pending approvals with approve/reject buttons"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-4",
+          "description": "No whitelist/pre-approval mechanism - ApprovalWhitelist is COMPLETELY MISSING from codebase. No table, no logic",
+          "file": null,
+          "line": null,
+          "requirement_id": "REQ-4.4-7",
+          "action_required": "Create ApprovalWhitelist Ecto schema, add whitelist checking logic before requesting approval, skip approval for whitelisted actions"
+        },
+        {
+          "severity": "HIGH",
+          "id": "CRITICAL-5",
+          "description": "Zero test coverage - No tests exist for ApprovalRequest, approval controller, approval workflow, whitelist, or any approval-related functionality",
+          "file": "test/",
+          "line": null,
+          "requirement_id": "REQ-4.4-1, REQ-4.4-2, REQ-4.4-3, REQ-4.4-4, REQ-4.4-5, REQ-4.4-6, REQ-4.4-7",
+          "action_required": "Add comprehensive test suite for approval system"
+        }
+      ],
+      "medium_issues": [
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-1",
+          "description": "WorkflowEngine doesn't integrate approvals - The entire approval system is completely disconnected from workflow execution. Agents execute without ever checking for approval requirements",
+          "file": "lib/agent_monitor/workflow_engine.ex",
+          "line": null,
+          "requirement_id": "REQ-4.4-1",
+          "action_required": "Add approval checkpoint to execute_agent_step. Check for pending approvals before executing agents. Block workflow until approval received"
+        },
+        {
+          "severity": "MEDIUM",
+          "id": "MEDIUM-2",
+          "description": "Missing estimated impact field - Story requirements specify UI should show estimated impact but ApprovalRequest schema has no such field",
+          "file": "lib/agent_monitor/approval_request.ex",
+          "line": 8-23,
+          "requirement_id": "REQ-4.4-3",
+          "action_required": "Add estimated_impact field to ApprovalRequest schema and migration. Display in approval UI"
+        }
+      ],
+      "low_issues": [
+        {
+          "severity": "LOW",
+          "id": "LOW-1",
+          "description": "No auto-expiry checking - Schema has expires_at field but NO background process exists to check for expired approvals and auto-reject them",
+          "file": "lib/agent_monitor/approval_request.ex, lib/agent_monitor/approval_controller.ex",
+          "line": null,
+          "requirement_id": "REQ-4.4-5",
+          "action_required": "Create background process using Timer or GenServer to check for expired approvals and auto-reject. Notify agent of rejection"
+        }
+      ]
+    }
+  },
+  "documentation_update_instructions": {
+    "story_file": "_bmad-output/implementation-artifacts/stories/agent-monitor-phase-4-5-stories.md",
+    "task_list_file": "this JSON file",
+    "synchronization_rules": [
+      {
+        "rule": "Update Story",
+        "description": "When completing a requirement, update the corresponding checkbox in the original BMAD story file",
+        "action": "Update story file's acceptance_criteria section: change '- [ ]' to '- [x]'"
+      },
+      {
+        "rule": "Update Task List",
+        "description": "Mark features as passes: true in this JSON as implementation progresses",
+        "action": "Update the passes field in features array from false to true when complete"
+      },
+      {
+        "rule": "Add Vital Documentation",
+        "description": "If new technical decisions, API endpoints, or architectural patterns emerge, document them in both files",
+        "action": "Add to story's technical_context/implementation_notes AND this JSON's documentation section"
+      }
+    ],
+    "why_important": [
+      "Enables comprehensive BMAD code review workflow to trace everything back to original story",
+      "Preserves traceability across the Ralph loop and code review lifecycle",
+      "Prevents information loss between Ralph iterations and code review",
+      "Reduces chance of agents inappropriately modifying test definitions (JSON is harder to modify than markdown)"
+    ]
+  },
+  "completion_instructions": {
+    "promise_format": "<promise>COMPLETE</promise>",
+    "loop_behavior": "Work iteratively until ALL acceptance criteria are met and verified",
+    "post_iteration_actions": [
+      "Implement requirements in order",
+      "Run tests and fix failures",
+      "Update both original BMAD story file AND this JSON file with progress",
+      "Verify implementation against requirements"
+    ],
+    "completion_criteria": [
+      "All acceptance criteria satisfied",
+      "All tests pass",
+      "All features marked passes: true",
+      "Documentation updated in both story and task list"
+    ],
+    "output_promise": "When genuinely complete and all criteria satisfied, output exactly: <promise>COMPLETE</promise>",
+    "warning": "DO NOT output the promise until all acceptance criteria are truly satisfied"
+  },
+  "features": [
+    {
+      "category": "functional",
+      "description": "Agent workflow engine supports sequential agent chaining",
+      "steps": [
+        "Create Workflow Ecto schema with fields: incident_id, status, current_step, steps, context",
+        "Implement WorkflowEngine module to manage agent chaining",
+        "Add execute_workflow function to process sequential agents",
+        "Handle workflow state transitions (pending -> in_progress -> completed/failed)"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Schema exists, WorkflowEngine exists, but has CRITICAL bugs: duplicate changeset function (workflow.ex:51-69), agent interface mismatch (workflow_engine.ex:282), missing agent modules (RootCauseAnalysis, Remediation), and ZERO tests",
+      "requirement_id": "REQ-4.1-1",
+      "mapped_from": "phase4-story4.1"
+    },
+    {
+      "category": "functional",
+      "description": "Default workflow chain: monitor_agent → investigate_agent → remediate_agent → verify_agent",
+      "steps": [
+        "Define default_workflow_chain as list of agent atoms: [:monitor_agent, :investigate_agent, :remediate_agent, :verify_agent]",
+        "Create configuration module for workflow chains",
+        "Add function to apply default chain to new workflows",
+        "Test default chain execution with sample incident"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Default chain defined (workflow_engine.ex:15) but agent modules don't exist - will crash at runtime",
+      "requirement_id": "REQ-4.1-2",
+      "mapped_from": "phase4-story4.1"
+    },
+    {
+      "category": "functional",
+      "description": "Output from each agent is passed as input to the next agent",
+      "steps": [
+        "Create data flow mechanism to pass agent outputs to next agent",
+        "Store each agent's output in workflow steps array",
+        "Add context aggregation function to merge outputs with incident context",
+        "Test output passing with multi-agent workflow"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Output passing logic exists (workflow_engine.ex:168-169) but broken due to missing agent modules",
+      "requirement_id": "REQ-4.1-3",
+      "mapped_from": "phase4-story4.1"
+    },
+    {
+      "category": "functional",
+      "description": "Workflow can be customized per incident type or playbook",
+      "steps": [
+        "Add custom_chain field to Workflow schema",
+        "Create function to load custom chain from playbook",
+        "Implement fallback to default chain when no custom chain exists",
+        "Test workflow customization with different incident types"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: Playbook integration stub exists but incomplete - get_workflow_chain only has basic fallback",
+      "requirement_id": "REQ-4.1-4",
+      "mapped_from": "phase4-story4.1"
+    },
+    {
+      "category": "functional",
+      "description": "Agents can be added/removed from workflow chain dynamically",
+      "steps": [
+        "Create add_agent_to_chain function for workflow",
+        "Create remove_agent_from_chain function for workflow",
+        "Update workflow steps array dynamically",
+        "Validate chain modification doesn't break execution",
+        "Test dynamic agent add/remove during workflow"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: No dynamic add/remove functions exist",
+      "requirement_id": "REQ-4.1-5",
+      "mapped_from": "phase4-story4.1"
+    },
+    {
+      "category": "functional",
+      "description": "Workflow state is persisted (pending, in_progress, completed, failed)",
+      "steps": [
+        "Define workflow status enum: :pending, :in_progress, :completed, :failed",
+        "Create WorkflowRepo for database operations",
+        "Implement status transition functions with validation",
+        "Add timestamps for state changes",
+        "Test workflow state persistence and retrieval"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: State persistence implemented but has MEDIUM schema issue - duplicate incident_id fields (string + foreign key)",
+      "requirement_id": "REQ-4.1-6",
+      "mapped_from": "phase4-story4.1"
+    },
+    {
+      "category": "functional",
+      "description": "Failed workflows can be retried from the failed agent",
+      "steps": [
+        "Store failed step index in workflow state",
+        "Create retry_workflow function starting from failed_step",
+        "Implement retry limit and backoff strategy",
+        "Update workflow status on retry success/failure",
+        "Test retry mechanism from various failure points"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Retry mechanism exists (workflow_engine.ex:71-85, 122-139) but has ZERO tests",
+      "requirement_id": "REQ-4.1-7",
+      "mapped_from": "phase4-story4.1"
+    },
+    {
+      "category": "functional",
+      "description": "Each agent has access to full conversation history from the workflow",
+      "steps": [
+        "Create Conversation Ecto schema with fields: workflow_id, agent_id, role, content, metadata, embedding",
+        "Implement function to retrieve full conversation history by workflow_id",
+        "Add conversation loading to agent execution context",
+        "Test conversation history retrieval for agents"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Schema exists and conversation history loaded in build_agent_context (workflow_engine.ex:216), but MEDIUM issue: WorkflowEngine bypasses ConversationManager and queries DB directly (workflow_engine.ex:269-276)",
+      "requirement_id": "REQ-4.2-1",
+      "mapped_from": "phase4-story4.2"
+    },
+    {
+      "category": "functional",
+      "description": "Context includes: previous agent outputs, incident data, system state, user inputs",
+      "steps": [
+        "Define context structure with: previous_outputs, incident_data, system_state, user_inputs",
+        "Create context aggregation function to gather all context elements",
+        "Pass context to agent execution function",
+        "Test comprehensive context availability for agents"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Context structure built correctly in build_agent_context (workflow_engine.ex:208-218) and includes all elements, but user_inputs is always empty - no mechanism exists for user to provide inputs",
+      "requirement_id": "REQ-4.2-2",
+      "mapped_from": "phase4-story4.2"
+    },
+    {
+      "category": "functional",
+      "description": "Conversation history is queryable (by agent, by time, by topic)",
+      "steps": [
+        "Add query functions to ConversationRepo",
+        "Implement filter_by_agent function",
+        "Implement filter_by_time_range function",
+        "Implement semantic search by topic using embeddings",
+        "Test conversation query functions"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: ConversationManager has filter_by_agent and filter_by_time_range (conversation_manager.ex:48-64), but HIGH issue: missing embedding field in schema prevents semantic search. MEDIUM issue: no topic-based search, only keyword matching",
+      "requirement_id": "REQ-4.2-3",
+      "mapped_from": "phase4-story4.2"
+    },
+    {
+      "category": "functional",
+      "description": "Context can be summarized for long conversations (to manage token limits)",
+      "steps": [
+        "Implement conversation summarization using LLM",
+        "Create token counting function to detect long conversations",
+        "Add context compression logic when token limit approached",
+        "Store summaries in conversation metadata",
+        "Test summarization with long conversation history"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: generate_summary (conversation_manager.ex:139-157) creates simple string summary, not LLM-based. HIGH issues: no LLM integration, no token counting logic (tokens field empty), no automatic context window management",
+      "requirement_id": "REQ-4.2-4",
+      "mapped_from": "phase4-story4.2"
+    },
+    {
+      "category": "functional",
+      "description": "Agents can add to conversation history during execution",
+      "steps": [
+        "Create add_message function for agents",
+        "Allow agents to append messages with role (system/user/assistant)",
+        "Store agent messages with timestamp and metadata",
+        "Test agent message appending during workflow"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: MEDIUM issue - no public API for agents to append messages. WorkflowEngine only creates one conversation entry per agent step (workflow_engine.ex:192-199). ConversationManager has add_message but is never called",
+      "requirement_id": "REQ-4.2-5",
+      "mapped_from": "phase4-story4.2"
+    },
+    {
+      "category": "functional",
+      "description": "Conversation history is persisted to the database",
+      "steps": [
+        "Create Ecto migration for conversations table",
+        "Configure ConversationRepo for CRUD operations",
+        "Implement bulk insert for agent messages",
+        "Add indexes for workflow_id and agent_id",
+        "Test database persistence and retrieval"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Migration exists (20240202120001_create_conversations.exs) with indexes, but HIGH issue: missing embedding field specified in story data model. No bulk insert implemented",
+      "requirement_id": "REQ-4.2-6",
+      "mapped_from": "phase4-story4.2"
+    },
+    {
+      "category": "functional",
+      "description": "Context is versioned (immutable snapshots for each workflow step)",
+      "steps": [
+        "Create ContextVersion Ecto schema with fields: workflow_id, step_number, context_snapshot",
+        "Implement function to create context snapshot before each step",
+        "Store immutable snapshots in database",
+        "Add function to retrieve context snapshot by step",
+        "Test context versioning and retrieval"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Schema and migration exist, snapshot creation called in execute_steps (workflow_engine.ex:172-178), but has ZERO test coverage",
+      "requirement_id": "REQ-4.2-7",
+      "mapped_from": "phase4-story4.2"
+    },
+    {
+      "category": "functional",
+      "description": "Workflow engine supports parallel execution of independent agents",
+      "steps": [
+        "Use Task.Supervisor or GenStage for parallel execution",
+        "Create ParallelExecutor module to manage concurrent tasks",
+        "Implement function to launch parallel agent tasks",
+        "Add timeout handling for parallel tasks",
+        "Test parallel execution with independent agents"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: ParallelExecutor exists but is DEAD CODE - started in application but NEVER called. WorkflowEngine doesn't use it at all. Zero test coverage",
+      "requirement_id": "REQ-4.3-1",
+      "mapped_from": "phase4-story4.3"
+    },
+    {
+      "category": "functional",
+      "description": "Workflow DAG can have multiple branches that run concurrently",
+      "steps": [
+        "Design workflow DAG data structure with branch support",
+        "Create function to identify parallel branches in DAG",
+        "Implement concurrent branch execution logic",
+        "Track branch execution status",
+        "Test DAG with multiple concurrent branches"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: Workflow schema has no DAG fields (branches, parallel structure, convergence points). No mechanism exists to define or identify parallel branches",
+      "requirement_id": "REQ-4.3-2",
+      "mapped_from": "phase4-story4.3"
+    },
+    {
+      "category": "functional",
+      "description": "Results from parallel agents are aggregated at convergence points",
+      "steps": [
+        "Create result aggregation function for convergence points",
+        "Merge parallel branch outputs into single context",
+        "Handle conflicting results from parallel branches",
+        "Pass aggregated context to next workflow step",
+        "Test result aggregation at convergence points"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: ParallelExecutor has aggregate_results and merge_successful_outputs (parallel_executor.ex:121-140), but since it's never called, this is dead code",
+      "requirement_id": "REQ-4.3-3",
+      "mapped_from": "phase4-story4.3"
+    },
+    {
+      "category": "functional",
+      "description": "Parallel agents have isolated contexts (no shared state during execution)",
+      "steps": [
+        "Implement context isolation for parallel tasks",
+        "Create separate process dictionaries or contexts for each agent",
+        "Ensure no shared mutable state between parallel agents",
+        "Use message passing for communication if needed",
+        "Test context isolation during parallel execution"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: create_isolated_context exists (parallel_executor.ex:87-92) and creates separate contexts per branch, but since ParallelExecutor is never used, this is untested dead code",
+      "requirement_id": "REQ-4.3-4",
+      "mapped_from": "phase4-story4.3"
+    },
+    {
+      "category": "functional",
+      "description": "Agent failures in one branch don't stop other branches",
+      "steps": [
+        "Implement fault isolation using separate supervisors",
+        "Catch agent errors and fail only that branch",
+        "Continue other branches to completion",
+        "Log branch failures for later review",
+        "Test fault isolation with failing parallel agent"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: execute_branch has try/rescue that catches errors and fails only that branch (parallel_executor.ex:73-84), but untested and never used",
+      "requirement_id": "REQ-4.3-5",
+      "mapped_from": "phase4-story4.3"
+    },
+    {
+      "category": "functional",
+      "description": "Parallel execution is configurable (sequential fallback available)",
+      "steps": [
+        "Add config option for parallel vs sequential execution",
+        "Implement sequential fallback when parallel disabled or unavailable",
+        "Create function to switch execution mode at runtime",
+        "Test both parallel and sequential execution modes"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: No configuration option exists for execution mode. No sequential fallback mechanism",
+      "requirement_id": "REQ-4.3-6",
+      "mapped_from": "phase4-story4.3"
+    },
+    {
+      "category": "functional",
+      "description": "Workflow state tracks which branches are complete/in-progress",
+      "steps": [
+        "Add branch_status field to workflow state",
+        "Track completion status for each parallel branch",
+        "Update branch status as agents complete",
+        "Provide query function for branch status",
+        "Test branch status tracking during parallel execution"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: Workflow schema has no branch_status field. No mechanism exists to track parallel branch completion",
+      "requirement_id": "REQ-4.3-7",
+      "mapped_from": "phase4-story4.3"
+    },
+    {
+      "category": "functional",
+      "description": "Agents can request human approval for sensitive actions",
+      "steps": [
+        "Create ApprovalRequest Ecto schema with fields: workflow_id, agent_id, action, status, context, risk_level, expires_at",
+        "Implement function to create approval request",
+        "Add approval checkpoint in agent execution",
+        "Block agent action until approval received",
+        "Test approval request creation and blocking"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Schema and create_changeset exist, but HIGH issue: NO mechanism for agents to request approval. WorkflowEngine doesn't integrate with approval system at all. Agents execute without approval checkpoints",
+      "requirement_id": "REQ-4.4-1",
+      "mapped_from": "phase4-story4.4"
+    },
+    {
+      "category": "functional",
+      "description": "Approval requests are sent via configured channel (email, Slack, UI notification)",
+      "steps": [
+        "Create notification service for approval requests",
+        "Implement email notification channel",
+        "Implement Slack webhook notification channel",
+        "Implement UI notification channel",
+        "Add configuration for channel selection",
+        "Test notifications on all channels"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: Email and Slack notification modules exist but are NEVER used for approvals. ApprovalRequest.create is never called to send notifications. No notification dispatch when approval is requested",
+      "requirement_id": "REQ-4.4-2",
+      "mapped_from": "phase4-story4.4"
+    },
+    {
+      "category": "functional",
+      "description": "Approval UI shows: agent action description, context, risk level, estimated impact",
+      "steps": [
+        "Create approval UI LiveView page",
+        "Display agent action description",
+        "Show approval context and risk level",
+        "Display estimated impact of action",
+        "Add approve/reject buttons",
+        "Test approval UI with sample requests"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: NO LiveView exists. Only ApprovalController which handles approve/reject RESPONSES. No UI for displaying pending approvals to users",
+      "requirement_id": "REQ-4.4-3",
+      "mapped_from": "phase4-story4.4"
+    },
+    {
+      "category": "functional",
+      "description": "Approvals can be: approve, reject, or approve with modifications",
+      "steps": [
+        "Implement approve action for approval request",
+        "Implement reject action with reason",
+        "Implement approve_with_modifications action",
+        "Handle modification suggestions in agent context",
+        "Test all approval response types"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: approve/reject changesets exist (approvers_controller.ex:40-51), but approvals are only created/approved via API, not triggered by agents during workflow execution",
+      "requirement_id": "REQ-4.4-4",
+      "mapped_from": "phase4-story4.4"
+    },
+    {
+      "category": "functional",
+      "description": "Approval workflow is time-boxed (auto-reject if no response within timeout)",
+      "steps": [
+        "Add timeout configuration to approval request",
+        "Create background process to check expired approvals",
+        "Auto-reject approval when timeout reached",
+        "Notify agent of timeout rejection",
+        "Test time-boxed approval with expiration"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Schema has expires_at and is_expired helper, but HIGH issue: NO background process to auto-reject expired approvals. Only manual expiry check in controller",
+      "requirement_id": "REQ-4.4-5",
+      "mapped_from": "phase4-story4.4"
+    },
+    {
+      "category": "functional",
+      "description": "Approval history is logged for audit purposes",
+      "steps": [
+        "Add approved_by and approved_at fields to Approval schema",
+        "Log all approval decisions with timestamps",
+        "Create audit log function for approvals",
+        "Implement approval history query",
+        "Test approval logging and history retrieval"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: Schema has approved_by and approved_at fields, and approve_changeset sets them (approvers_controller.ex:73-75). But no separate audit log exists or approval history query function",
+      "requirement_id": "REQ-4.4-6",
+      "mapped_from": "phase4-story4.4"
+    },
+    {
+      "category": "functional",
+      "description": "Approval can be pre-approved for certain agents or incident types (whitelist)",
+      "steps": [
+        "Create ApprovalWhitelist Ecto schema",
+        "Define whitelist criteria (agent_id, incident_type, risk_level)",
+        "Implement function to check whitelist before requesting approval",
+        "Skip approval for whitelisted agents/actions",
+        "Test pre-approval with whitelist configuration"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: NO whitelist table, no whitelist schema, no whitelist checking logic. This functionality is COMPLETELY MISSING",
+      "requirement_id": "REQ-4.4-7",
+      "mapped_from": "phase4-story4.4"
+    },
+    {
+      "category": "functional",
+      "description": "Agent marketplace UI lists available agents with descriptions and capabilities",
+      "steps": [
+        "Create MarketplaceAgent Ecto schema with fields: name, description, author, version, capabilities, package_url, rating, downloads, is_installed",
+        "Create marketplace UI LiveView page",
+        "Display list of agents with metadata",
+        "Add search and filter functionality",
+        "Test marketplace UI with sample agents"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: MarketplaceLive UI exists and displays agents, but HIGH issue: MarketplaceAgent schema doesn't exist. Agents are HARDCODED in LiveView instead of loaded from database. No marketplace controller exists for API endpoints",
+      "requirement_id": "REQ-4.5-1",
+      "mapped_from": "phase4-story4.5"
+    },
+    {
+      "category": "functional",
+      "description": "Agents can be installed from the marketplace into local agent registry",
+      "steps": [
+        "Create AgentRegistry module",
+        "Implement download_agent function from package_url",
+        "Implement install_agent function to add to registry",
+        "Update marketplace_agent is_installed flag",
+        "Test agent installation from marketplace"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: Marketplace has install event (marketplace_live.ex:29-31) but it only shows flash message. NO AgentRegistry module exists. NO database table for agent registry. NO actual installation logic or package download from package_url",
+      "requirement_id": "REQ-4.5-2",
+      "mapped_from": "phase4-story4.5"
+    },
+    {
+      "category": "functional",
+      "description": "Agent metadata includes: name, description, author, version, capabilities, dependencies",
+      "steps": [
+        "Define agent metadata schema with all required fields",
+        "Create metadata validation function",
+        "Implement capabilities and dependencies parsing",
+        "Display metadata in marketplace UI",
+        "Test metadata validation and display"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: HARDCODED agents in MarketplaceLive (lines 39-93) include capabilities field, but HIGH issue: MarketplaceAgent schema doesn't exist. Dependencies field missing from agents. No metadata validation. No capability parsing logic exists",
+      "requirement_id": "REQ-4.5-3",
+      "mapped_from": "phase4-story4.5"
+    },
+    {
+      "category": "functional",
+      "description": "Marketplace supports filtering by capability (monitoring, investigation, remediation, verification)",
+      "steps": [
+        "Add capability filter UI to marketplace",
+        "Implement filter_by_capability function",
+        "Filter agent list based on selected capabilities",
+        "Update UI dynamically when filters change",
+        "Test filtering by different capabilities"
+      ],
+      "passes": false,
+      "implementation_notes": "PARTIAL: MarketplaceLive has capability filtering UI (marketplace_live.ex:18-25, 97-102), but HIGH issue: Filters HARDCODED agents instead of database query. No AgentRegistry or MarketplaceAgent tables exist to query from",
+      "requirement_id": "REQ-4.5-4",
+      "mapped_from": "phase4-story4.5"
+    },
+    {
+      "category": "functional",
+      "description": "Agents can be rated and reviewed by users",
+      "steps": [
+        "Create AgentReview Ecto schema",
+        "Add rating and review fields to MarketplaceAgent",
+        "Implement submit_review function",
+        "Calculate average rating from reviews",
+        "Display reviews and ratings in marketplace",
+        "Test review submission and rating calculation"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: MarketplaceLive displays hardcoded ratings in template (marketplace/index.html.heex:62), but HIGH issues: NO AgentReview schema or table exists. NO submit_review function. NO review database. NO mechanism for users to rate or review agents",
+      "requirement_id": "REQ-4.5-5",
+      "mapped_from": "phase4-story4.5"
+    },
+    {
+      "category": "functional",
+      "description": "Agents can be shared as packages (Elixir modules or external services)",
+      "steps": [
+        "Design package format for Elixir module agents",
+        "Design package format for webhook agents",
+        "Implement package creation function",
+        "Add package upload to marketplace",
+        "Test package sharing for both types"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: MarketplaceLive UI has no package sharing features. NO marketplace controller exists. NO upload functionality. NO package format design. MarketplaceAgent schema doesn't have package_url field for agents to share",
+      "requirement_id": "REQ-4.5-6",
+      "mapped_from": "phase4-story4.5"
+    },
+    {
+      "category": "functional",
+      "description": "Marketplace agents can be versioned and updated",
+      "steps": [
+        "Add version field to MarketplaceAgent",
+        "Implement version comparison function",
+        "Create update_agent function to check for new versions",
+        "Display available updates in marketplace",
+        "Test agent versioning and updates"
+      ],
+      "passes": false,
+      "implementation_notes": "NOT_IMPLEMENTED: MarketplaceAgent schema doesn't exist. NO marketplace controller or update checking logic. NO mechanism to check for new versions or update agents. MarketplaceLive has update button (marketplace/index.html.heex:128) but only links to preview page, no actual update function",
+      "requirement_id": "REQ-4.5-7",
+      "mapped_from": "phase4-story4.5"
+    },
+    {
+      "category": "functional",
+      "description": "Dashboard is built with Phoenix LiveView for real-time updates",
+      "steps": [
+        "Create DashboardLive LiveView module",
+        "Set up Phoenix.LiveView routing",
+        "Create dashboard layout template",
+        "Implement real-time event subscriptions",
+        "Test dashboard LiveView with sample data"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.1-1",
+      "mapped_from": "phase5-story5.1"
+    },
+    {
+      "category": "functional",
+      "description": "Active workflows are displayed in real-time (status updates automatically)",
+      "steps": [
+        "Create workflow status tracking in LiveView assigns",
+        "Subscribe to workflow update events via PubSub",
+        "Handle workflow_update events to update UI",
+        "Display workflow list with status indicators",
+        "Test real-time workflow status updates"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.1-2",
+      "mapped_from": "phase5-story5.1"
+    },
+    {
+      "category": "functional",
+      "description": "Agent conversations stream live as they happen",
+      "steps": [
+        "Create ConversationLive LiveView component",
+        "Subscribe to conversation events",
+        "Append new messages to conversation stream",
+        "Display messages in chat format",
+        "Test live conversation streaming"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.1-3",
+      "mapped_from": "phase5-story5.1"
+    },
+    {
+      "category": "functional",
+      "description": "System metrics (uptime, active incidents, agent status) update in real-time",
+      "steps": [
+        "Create metrics collection service",
+        "Subscribe to metric update events",
+        "Display metrics in dashboard cards",
+        "Update metrics in real-time via PubSub",
+        "Test real-time metric updates"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.1-4",
+      "mapped_from": "phase5-story5.1"
+    },
+    {
+      "category": "functional",
+      "description": "UI responds to server events (agent started, workflow completed, approval requested)",
+      "steps": [
+        "Define server event types: agent_started, workflow_completed, approval_requested",
+        "Create event handlers for each type",
+        "Update UI components based on events",
+        "Add visual feedback for events",
+        "Test UI responses to all event types"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.1-5",
+      "mapped_from": "phase5-story5.1"
+    },
+    {
+      "category": "functional",
+      "description": "LiveView uses pub/sub for efficient updates (no polling)",
+      "steps": [
+        "Configure Phoenix.PubSub for dashboard",
+        "Subscribe to topics instead of polling",
+        "Publish events on state changes",
+        "Unsubscribe when LiveView disconnects",
+        "Test pub/sub-based updates vs polling"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.1-6",
+      "mapped_from": "phase5-story5.1"
+    },
+    {
+      "category": "functional",
+      "description": "Dashboard is responsive and works on mobile/tablet",
+      "steps": [
+        "Use responsive CSS framework (Tailwind)",
+        "Implement mobile-friendly layouts",
+        "Add touch-friendly UI elements",
+        "Test dashboard on various screen sizes",
+        "Optimize for mobile performance"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.1-7",
+      "mapped_from": "phase5-story5.1"
+    },
+    {
+      "category": "functional",
+      "description": "Uptime graphs show system availability over time (hourly, daily, weekly, monthly)",
+      "steps": [
+        "Create UptimeMetric Ecto schema with fields: timestamp, service_id, status, response_time_ms, incident_id",
+        "Implement data aggregation for hourly/daily/weekly/monthly periods",
+        "Select charting library (Chart.js or SVG)",
+        "Create graph component with time period selector",
+        "Test graph rendering for all time periods"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.2-1",
+      "mapped_from": "phase5-story5.2"
+    },
+    {
+      "category": "functional",
+      "description": "Incident markers are plotted on the uptime timeline",
+      "steps": [
+        "Retrieve incidents within graph time range",
+        "Plot incident markers on uptime graph at correct timestamps",
+        "Color-code markers by severity (P1=red, P2=orange, P3=yellow, P4=blue)",
+        "Add tooltips to markers with incident info",
+        "Test incident marker plotting"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.2-2",
+      "mapped_from": "phase5-story5.2"
+    },
+    {
+      "category": "functional",
+      "description": "Graphs can be filtered by service, agent, or incident type",
+      "steps": [
+        "Add filter UI with service/agent/incident type selectors",
+        "Implement filter_by_service, filter_by_agent, filter_by_incident_type functions",
+        "Update graph data based on filters",
+        "Apply filters to incident markers",
+        "Test graph filtering"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.2-3",
+      "mapped_from": "phase5-story5.2"
+    },
+    {
+      "category": "functional",
+      "description": "Hover tooltips show incident details (when clicked, jump to incident details)",
+      "steps": [
+        "Add hover event listeners to incident markers",
+        "Display tooltip with incident title, severity, time",
+        "Implement click handler to navigate to incident details",
+        "Add animation for tooltips",
+        "Test tooltips and click navigation"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.2-4",
+      "mapped_from": "phase5-story5.2"
+    },
+    {
+      "category": "functional",
+      "description": "Support for uptime comparison (current vs. previous period)",
+      "steps": [
+        "Add comparison mode to graph component",
+        "Fetch current period and previous period data",
+        "Display both datasets on graph",
+        "Calculate and show uptime percentage change",
+        "Test period comparison"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.2-5",
+      "mapped_from": "phase5-story5.2"
+    },
+    {
+      "category": "functional",
+      "description": "Export data as CSV for external analysis",
+      "steps": [
+        "Implement CSV export function for uptime data",
+        "Add export button to graph component",
+        "Format data as CSV with headers",
+        "Trigger file download on button click",
+        "Test CSV export functionality"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.2-6",
+      "mapped_from": "phase5-story5.2"
+    },
+    {
+      "category": "functional",
+      "description": "Graphs use caching for fast loading of historical data",
+      "steps": [
+        "Implement cache for aggregated uptime data",
+        "Cache results by time period and filters",
+        "Set cache expiration time",
+        "Load from cache if available, else compute and cache",
+        "Test cache performance improvement"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.2-7",
+      "mapped_from": "phase5-story5.2"
+    },
+    {
+      "category": "functional",
+      "description": "Conversation view shows chat-style interface (like messaging app)",
+      "steps": [
+        "Create ConversationLive LiveView for chat interface",
+        "Render messages in chat bubbles (left/right alignment)",
+        "Add sender name and timestamp to each message",
+        "Scroll to latest message automatically",
+        "Test chat interface with sample conversation"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.3-1",
+      "mapped_from": "phase5-story5.3"
+    },
+    {
+      "category": "functional",
+      "description": "Messages are color-coded by agent (different agents have different colors)",
+      "steps": [
+        "Assign unique colors to each agent_id",
+        "Apply color classes to message bubbles",
+        "Create color palette or generate colors programmatically",
+        "Display agent name in message header",
+        "Test color coding across multiple agents"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.3-2",
+      "mapped_from": "phase5-story5.3"
+    },
+    {
+      "category": "functional",
+      "description": "Flow diagram view shows agent workflow as a visual graph",
+      "steps": [
+        "Select graph visualization library (Mermaid.js)",
+        "Create WorkflowDiagramLive LiveView component",
+        "Generate Mermaid graph from workflow steps",
+        "Render graph in LiveView template",
+        "Test workflow diagram rendering"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.3-3",
+      "mapped_from": "phase5-story5.3"
+    },
+    {
+      "category": "functional",
+      "description": "Nodes in the diagram represent agents, edges represent handoffs",
+      "steps": [
+        "Map workflow steps to graph nodes",
+        "Define edges between sequential agents",
+        "Include parallel branches in graph structure",
+        "Add labels to nodes and edges",
+        "Test node/edge representation"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.3-4",
+      "mapped_from": "phase5-story5.3"
+    },
+    {
+      "category": "functional",
+      "description": "Clicking a node shows that agent's conversation and output",
+      "steps": [
+        "Add click handlers to graph nodes",
+        "Load agent conversation on node click",
+        "Display conversation in modal or side panel",
+        "Show agent output alongside conversation",
+        "Test node click and conversation display"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.3-5",
+      "mapped_from": "phase5-story5.3"
+    },
+    {
+      "category": "functional",
+      "description": "Support for collapsing/expanding conversation threads",
+      "steps": [
+        "Add collapse/expand toggle to conversation messages",
+        "Group messages by agent or topic for threading",
+        "Hide/show message groups on toggle",
+        "Maintain collapsed state in assigns",
+        "Test collapse/expand functionality"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.3-6",
+      "mapped_from": "phase5-story5.3"
+    },
+    {
+      "category": "functional",
+      "description": "Search/filter conversations by agent, time, or keyword",
+      "steps": [
+        "Add search input and filter dropdowns to conversation view",
+        "Implement filter_by_agent function",
+        "Implement filter_by_time_range function",
+        "Implement search_by_keyword function",
+        "Update conversation list based on filters",
+        "Test search and filter combinations"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.3-7",
+      "mapped_from": "phase5-story5.3"
+    },
+    {
+      "category": "functional",
+      "description": "Incident list view shows all incidents with status, severity, and assignee",
+      "steps": [
+        "Create IncidentLive LiveView for incident list",
+        "Fetch all incidents from database",
+        "Display incident table with columns: title, status, severity, assignee, detected_at",
+        "Add status and severity badges with color coding",
+        "Test incident list with sample data"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.4-1",
+      "mapped_from": "phase5-story5.4"
+    },
+    {
+      "category": "functional",
+      "description": "Incident detail view shows full workflow, agent conversations, and timeline",
+      "steps": [
+        "Create IncidentDetailLive LiveView",
+        "Fetch incident with associated workflow",
+        "Display workflow steps and agent conversations",
+        "Show timeline of incident events",
+        "Test incident detail view"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.4-2",
+      "mapped_from": "phase5-story5.4"
+    },
+    {
+      "category": "functional",
+      "description": "Incidents can be created manually or auto-created by agents",
+      "steps": [
+        "Create Incident Ecto schema with fields: title, description, status, severity, assigned_to, playbook_id, workflow_id, detected_at, resolved_at, closed_at",
+        "Create manual incident creation form UI",
+        "Implement agent-triggered incident creation",
+        "Add incident creation permissions",
+        "Test both manual and auto-creation"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.4-3",
+      "mapped_from": "phase5-story5.4"
+    },
+    {
+      "category": "functional",
+      "description": "Incidents can be assigned to users or teams",
+      "steps": [
+        "Add assigned_to field to Incident schema",
+        "Create user and team selection dropdown",
+        "Implement assign_incident function",
+        "Send notification on assignment",
+        "Test incident assignment"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.4-4",
+      "mapped_from": "phase5-story5.4"
+    },
+    {
+      "category": "functional",
+      "description": "Incident states: open, in_progress, resolved, closed, reopened",
+      "steps": [
+        "Define incident status enum: :open, :in_progress, :resolved, :closed, :reopened",
+        "Implement state transition validation",
+        "Create transition functions with business logic",
+        "Update status via UI actions",
+        "Test all state transitions"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.4-5",
+      "mapped_from": "phase5-story5.4"
+    },
+    {
+      "category": "functional",
+      "description": "Severity levels: P1 (critical), P2 (high), P3 (medium), P4 (low)",
+      "steps": [
+        "Define severity enum: :P1, :P2, :P3, :P4",
+        "Add severity selection to incident form",
+        "Display severity badges with color coding (P1=red, P2=orange, P3=yellow, P4=green)",
+        "Sort incidents by severity in list view",
+        "Test severity levels and display"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.4-6",
+      "mapped_from": "phase5-story5.4"
+    },
+    {
+      "category": "functional",
+      "description": "Incidents support comments, attachments, and related incident linking",
+      "steps": [
+        "Create Comment embed schema for Incident",
+        "Create attachment upload functionality",
+        "Add related_incidents has_many relationship",
+        "Create UI for adding comments and attachments",
+        "Implement link/unlink related incidents",
+        "Test comments, attachments, and linking"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.4-7",
+      "mapped_from": "phase5-story5.4"
+    },
+    {
+      "category": "functional",
+      "description": "Incidents can be linked to playbooks for remediation guidance",
+      "steps": [
+        "Add playbook_id foreign key to Incident schema",
+        "Create playbook selection dropdown",
+        "Display playbook steps in incident detail",
+        "Auto-link playbook based on incident type",
+        "Test playbook linking and display"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.4-8",
+      "mapped_from": "phase5-story5.4"
+    },
+    {
+      "category": "functional",
+      "description": "Playbook editor UI for creating playbook steps",
+      "steps": [
+        "Create Playbook Ecto schema with fields: name, description, incident_type, variables, steps, version, is_active",
+        "Create PlaybookEditorLive LiveView",
+        "Design step editor interface with agent, instructions, approval fields",
+        "Add add/remove step buttons",
+        "Test playbook editor UI"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.5-1",
+      "mapped_from": "phase5-story5.5"
+    },
+    {
+      "category": "functional",
+      "description": "Playbooks define: workflow chain, agent-specific instructions, approval requirements",
+      "steps": [
+        "Design playbook steps schema with agent, instructions, requires_approval fields",
+        "Create workflow chain builder in editor",
+        "Add rich text editor for instructions",
+        "Add approval requirement checkbox per step",
+        "Test playbook definition with sample steps"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.5-2",
+      "mapped_from": "phase5-story5.5"
+    },
+    {
+      "category": "functional",
+      "description": "Playbooks can be organized by incident type or service",
+      "steps": [
+        "Add incident_type and service fields to Playbook schema",
+        "Create playbook organization UI with folders/tags",
+        "Filter playbooks by incident type or service",
+        "Display playbook tree structure",
+        "Test playbook organization"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.5-3",
+      "mapped_from": "phase5-story5.5"
+    },
+    {
+      "category": "functional",
+      "description": "Playbook editor supports versioning (playbooks can be forked and updated)",
+      "steps": [
+        "Add version field to Playbook schema",
+        "Implement fork_playbook function",
+        "Create version comparison UI",
+        "Add author and timestamp tracking",
+        "Test playbook versioning and forking"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.5-4",
+      "mapped_from": "phase5-story5.5"
+    },
+    {
+      "category": "functional",
+      "description": "Playbooks can be previewed (test workflow without running agents)",
+      "steps": [
+        "Create workflow preview function",
+        "Render playbook steps in preview mode",
+        "Simulate workflow execution visually",
+        "Add preview button to editor",
+        "Test playbook preview"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.5-5",
+      "mapped_from": "phase5-story5.5"
+    },
+    {
+      "category": "functional",
+      "description": "Playbooks can be shared with other users/teams",
+      "steps": [
+        "Add permissions to Playbook schema (owner, team, public)",
+        "Create share functionality",
+        "Add team selection for sharing",
+        "Display shared playbooks in marketplace",
+        "Test playbook sharing"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.5-6",
+      "mapped_from": "phase5-story5.5"
+    },
+    {
+      "category": "functional",
+      "description": "Playbooks support variables (placeholders for dynamic values like service names)",
+      "steps": [
+        "Add variables array to Playbook schema",
+        "Create variable definition UI (name, default_value, description)",
+        "Implement variable interpolation at runtime",
+        "Use {{variable_name}} syntax in instructions",
+        "Test variable definition and interpolation"
+      ],
+      "passes": false,
+      "requirement_id": "REQ-5.5-7",
+      "mapped_from": "phase5-story5.5"
+    }
+  ]
+}

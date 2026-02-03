@@ -1,0 +1,72 @@
+~H"""
+<div class="flex gap-4 mb-6">
+  <.link navigate={~p"/"} class="text-blue-600 hover:text-blue-800">
+    ← Back to Dashboard
+  </.link>
+</div>
+
+<.header>
+  Agent Marketplace
+  <:subtitle>Discover and install agents for your workflows</:subtitle>
+</.header>
+
+<div class="flex gap-4 mb-6">
+  <form phx-change="filter_capability" class="flex items-center gap-2">
+    <label class="text-sm font-medium text-zinc-700">Capability:</label>
+    <select name="capability" class="rounded-md border-zinc-300 text-sm">
+      <%= for capability <- [:all, :monitoring, :investigation, :remediation, :verification] do %>
+        <option value={capability} selected={@filter_capability == capability}>
+          <%= String.capitalize(to_string(capability)) %>
+        </option>
+      <% end %>
+    </select>
+  </form>
+</div>
+
+<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+  <%= for agent <- @agents do %>
+    <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-zinc-900/5">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-zinc-900"><%= agent.name %></h3>
+          <p class="text-sm text-zinc-500"><%= agent.author %> · v<%= agent.version %></p>
+        </div>
+        <%= if agent.is_installed do %>
+          <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+            Installed
+          </span>
+        <% else %>
+          <button
+            phx-click="install"
+            phx-value-agent_id={agent.id}
+            class="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Install
+          </button>
+        <% end %>
+      </div>
+
+      <p class="text-sm text-zinc-600 mb-4"><%= agent.description %></p>
+
+      <div class="flex gap-2 mb-4">
+        <%= for capability <- agent.capabilities do %>
+          <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-600">
+            <%= String.capitalize(to_string(capability)) %>
+          </span>
+        <% end %>
+      </div>
+
+      <div class="flex items-center justify-between text-sm text-zinc-500">
+        <div class="flex items-center gap-1">
+          <span>⭐</span>
+          <span><%= agent.rating %></span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span>📥</span>
+          <span><%= agent.downloads %> downloads</span>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+"""

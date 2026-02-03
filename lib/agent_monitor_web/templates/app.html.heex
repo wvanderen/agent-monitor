@@ -1,0 +1,133 @@
+<.header>
+  Dashboard
+  <:subtitle>Real-time monitoring of agents and workflows</:subtitle>
+</.header>
+
+<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+  <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-zinc-900/5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-zinc-500">Active Workflows</p>
+        <p class="mt-2 text-3xl font-semibold text-zinc-900"><%= @active_workflows %></p>
+      </div>
+      <div class="text-4xl">⚡</div>
+    </div>
+  </div>
+
+  <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-zinc-900/5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-zinc-500">Open Incidents</p>
+        <p class="mt-2 text-3xl font-semibold text-zinc-900"><%= @open_incidents %></p>
+      </div>
+      <div class="text-4xl">🚨</div>
+    </div>
+  </div>
+
+  <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-zinc-900/5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-zinc-500">System Uptime</p>
+        <p class="mt-2 text-3xl font-semibold text-zinc-900"><%= @uptime %></p>
+      </div>
+      <div class="text-4xl">📊</div>
+    </div>
+  </div>
+
+  <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-zinc-900/5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-zinc-500">Agents Running</p>
+        <p class="mt-2 text-3xl font-semibold text-zinc-900"><%= @agents_running %></p>
+      </div>
+      <div class="text-4xl">🤖</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-2">
+  <div class="rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/5">
+    <div class="border-b border-zinc-200 px-6 py-4">
+      <h2 class="text-base font-semibold text-zinc-900">Active Workflows</h2>
+    </div>
+    <div class="px-6 py-4">
+      <%= if @workflows == [] do %>
+        <p class="text-sm text-zinc-500">No active workflows</p>
+      <% else %>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-left text-zinc-500">
+              <tr>
+                <th class="pb-2">Incident</th>
+                <th class="pb-2">Status</th>
+                <th class="pb-2">Current Step</th>
+                <th class="pb-2">Progress</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100">
+              <%= for workflow <- @workflows do %>
+                <tr>
+                  <td class="py-2"><%= workflow.incident_id %></td>
+                  <td class="py-2">
+                    <span class={
+                      "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium",
+                      status_bg_color(workflow.status)
+                    }>
+                      <%= workflow.status %>
+                    </span>
+                  </td>
+                  <td class="py-2"><%= workflow.current_step %></td>
+                  <td class="py-2">
+                    <div class="w-full bg-zinc-200 rounded-full h-2.5">
+                      <div class="bg-blue-600 h-2.5 rounded-full" style={"width: #{workflow_progress(workflow)}%"}></div>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/5">
+    <div class="border-b border-zinc-200 px-6 py-4">
+      <h2 class="text-base font-semibold text-zinc-900">Recent Incidents</h2>
+    </div>
+    <div class="px-6 py-4">
+      <%= if @incidents == [] do %>
+        <p class="text-sm text-zinc-500">No recent incidents</p>
+      <% else %>
+        <div class="space-y-3">
+          <%= for incident <- @incidents do %>
+            <div class="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-50 border border-zinc-200">
+              <div>
+                <h3 class="text-sm font-medium text-zinc-900"><%= incident.title %></h3>
+                <p class="text-xs text-zinc-500 mt-1">
+                  <%= Calendar.strftime(incident.inserted_at, "%b %d, %Y %H:%M") %>
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class={
+                  "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium",
+                  severity_bg_color(incident.severity)
+                }>
+                  <%= incident.severity %>
+                </span>
+                <span class={
+                  "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium",
+                  status_bg_color(incident.status)
+                }>
+                  <%= incident.status %>
+                </span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<.navigation_links />

@@ -78,12 +78,12 @@ defmodule Monitor.EndpointChecker do
     result = check_endpoint(state.url)
 
     new_state = %{
-      state |
-      last_check: DateTime.utc_now(),
-      last_result: result,
-      check_count: state.check_count + 1,
-      status: if(result.status == :ok, do: :healthy, else: :unhealthy),
-      failure_count: if(result.status == :ok, do: 0, else: state.failure_count + 1)
+      state
+      | last_check: DateTime.utc_now(),
+        last_result: result,
+        check_count: state.check_count + 1,
+        status: if(result.status == :ok, do: :healthy, else: :unhealthy),
+        failure_count: if(result.status == :ok, do: 0, else: state.failure_count + 1)
     }
 
     # Report to coordinator
@@ -96,38 +96,38 @@ defmodule Monitor.EndpointChecker do
     start_time = System.monotonic_time(:millisecond)
 
     case HTTPoison.get(url, [], follow_redirect: true, timeout: 5000) do
-        {:ok, %{status_code: code, body: body, headers: headers}} ->
-          end_time = System.monotonic_time(:millisecond)
-          duration = end_time - start_time
+      {:ok, %{status_code: code, body: body, headers: headers}} ->
+        end_time = System.monotonic_time(:millisecond)
+        duration = end_time - start_time
 
-          if code >= 200 and code < 300 do
-            %{
-              status: :ok,
-              code: code,
-              duration_ms: duration,
-              body_size: byte_size(body),
-              headers: headers
-            }
-          else
-            %{
-              status: :error,
-              code: code,
-              duration_ms: duration,
-              reason: "HTTP #{code}"
-            }
-          end
-
-        {:error, %{reason: reason}} ->
-          end_time = System.monotonic_time(:millisecond)
-          duration = end_time - start_time
-
+        if code >= 200 and code < 300 do
+          %{
+            status: :ok,
+            code: code,
+            duration_ms: duration,
+            body_size: byte_size(body),
+            headers: headers
+          }
+        else
           %{
             status: :error,
-            code: nil,
+            code: code,
             duration_ms: duration,
-            reason: inspect(reason)
+            reason: "HTTP #{code}"
           }
-      end
+        end
+
+      {:error, %{reason: reason}} ->
+        end_time = System.monotonic_time(:millisecond)
+        duration = end_time - start_time
+
+        %{
+          status: :error,
+          code: nil,
+          duration_ms: duration,
+          reason: inspect(reason)
+        }
+    end
   end
 
   defp schedule_check(interval) do

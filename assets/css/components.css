@@ -1,0 +1,47 @@
+import "./app.css"
+
+@layer components {
+  .btn {
+    @apply rounded-lg;
+    @apply px-3;
+    @apply py-2;
+    @apply text-sm;
+    @apply font-medium;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600;
+    @apply text-white;
+    @apply hover:bg-blue-700;
+  }
+
+  .btn-secondary {
+    @apply bg-zinc-600;
+    @apply text-white;
+    @apply hover:bg-zinc-700;
+  }
+
+  .btn-success {
+    @apply bg-green-600;
+    @apply text-white;
+    @apply hover:bg-green-700;
+  }
+
+  .card {
+    @apply rounded-lg;
+    @apply bg-white;
+    @apply shadow-sm;
+    @apply ring-1;
+    @apply ring-zinc-900/5;
+  }
+
+  .badge {
+    @apply inline-flex;
+    @apply items-center;
+    @apply rounded-md;
+    @apply px-2;
+    @apply py-1;
+    @apply text-xs;
+    @apply font-medium;
+  }
+}

@@ -1,0 +1,160 @@
+~H"""
+<div class="flex gap-4 mb-6">
+  <.link navigate={~p"/playbooks"} class="text-blue-600 hover:text-blue-800">
+    ← Back to Playbooks
+  </.link>
+</div>
+
+<.header>
+  Edit Playbook: <%= @playbook.name %>
+  <:subtitle>Configure workflow steps and variables</:subtitle>
+</.header>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="lg:col-span-2 space-y-6">
+    <div class="rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/5">
+      <div class="border-b border-zinc-200 px-6 py-4">
+        <h2 class="text-base font-semibold text-zinc-900">Workflow Steps</h2>
+      </div>
+      <div class="px-6 py-4">
+        <%= if @playbook.steps == [] do %>
+          <p class="text-sm text-zinc-500">No steps defined yet. Add your first step below.</p>
+        <% else %>
+          <div class="space-y-3">
+            <%= for {step, index} <- Enum.with_index(@playbook.steps) do %>
+              <div class="border border-zinc-200 rounded-lg p-4">
+                <div class="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 class="text-sm font-medium text-zinc-900">Step <%= index + 1 %></h3>
+                    <p class="text-xs text-zinc-500"><%= step["agent"] %></p>
+                  </div>
+                  <button
+                    phx-click="remove_step"
+                    phx-value-index={index}
+                    class="text-red-600 hover:text-red-800 text-sm"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div class="space-y-2">
+                  <div>
+                    <p class="text-xs font-medium text-zinc-500">Instructions</p>
+                    <p class="text-sm text-zinc-700"><%= step["instructions"] %></p>
+                  </div>
+                  <%= if step["requires_approval"] do %>
+                    <p class="text-xs text-orange-600 font-medium">⚠️ Requires Approval</p>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/5">
+      <div class="border-b border-zinc-200 px-6 py-4">
+        <h2 class="text-base font-semibold text-zinc-900">Add New Step</h2>
+      </div>
+      <div class="px-6 py-4">
+        <form phx-submit="add_step" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-zinc-700 mb-1">Agent</label>
+            <select
+              name="step_agent"
+              class="w-full rounded-md border-zinc-300 text-sm"
+            >
+              <option value="monitor_agent" selected={@step_agent == "monitor_agent"}>
+                Monitor Agent
+              </option>
+              <option value="investigate_agent" selected={@step_agent == "investigate_agent"}>
+                Investigate Agent
+              </option>
+              <option value="remediate_agent" selected={@step_agent == "remediate_agent"}>
+                Remediate Agent
+              </option>
+              <option value="verify_agent" selected={@step_agent == "verify_agent"}>
+                Verify Agent
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-zinc-700 mb-1">Instructions</label>
+            <textarea
+              name="step_instructions"
+              class="w-full rounded-md border-zinc-300 text-sm"
+              rows="3"
+              placeholder="Describe what this agent should do..."
+            ><%= @step_instructions %></textarea>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="step_requires_approval"
+              name="step_requires_approval"
+              checked={@step_requires_approval}
+              class="rounded border-zinc-300"
+            />
+            <label for="step_requires_approval" class="text-sm text-zinc-700">
+              Requires Approval
+            </label>
+          </div>
+
+          <button type="submit" class="w-full rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700">
+            Add Step
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <div class="rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/5">
+      <div class="border-b border-zinc-200 px-6 py-4">
+        <h2 class="text-base font-semibold text-zinc-900">Actions</h2>
+      </div>
+      <div class="px-6 py-4 space-y-2">
+        <button
+          phx-click="save"
+          class="w-full rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
+        >
+          Save Playbook
+        </button>
+        <button
+          class="w-full rounded-lg bg-zinc-600 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+        >
+          Preview Workflow
+        </button>
+        <button
+          class="w-full rounded-lg bg-zinc-600 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+        >
+          Export as JSON
+        </button>
+      </div>
+    </div>
+
+    <div class="rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/5">
+      <div class="border-b border-zinc-200 px-6 py-4">
+        <h2 class="text-base font-semibold text-zinc-900">Variables</h2>
+      </div>
+      <div class="px-6 py-4">
+        <%= if @playbook.variables == [] do %>
+          <p class="text-sm text-zinc-500">No variables defined</p>
+        <% else %>
+          <div class="space-y-2">
+            <%= for variable <- @playbook.variables do %>
+              <div class="border border-zinc-200 rounded p-2">
+                <p class="text-sm font-medium text-zinc-900"><%= variable["name"] %></p>
+                <p class="text-xs text-zinc-500"><%= variable["description"] %></p>
+                <p class="text-xs text-zinc-600">Default: <%= variable["default_value"] %></p>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+"""

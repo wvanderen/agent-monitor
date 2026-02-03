@@ -1,0 +1,78 @@
+~H"""
+<div class="flex gap-4 mb-6">
+  <.link navigate={~p"/"} class="text-blue-600 hover:text-blue-800">
+    ← Back to Dashboard
+  </.link>
+</div>
+
+<.header>
+  Workflows
+  <:subtitle>View and manage agent workflows</:subtitle>
+</.header>
+
+<div class="flex gap-4 mb-6">
+  <form phx-change="filter_status" class="flex items-center gap-2">
+    <label class="text-sm font-medium text-zinc-700">Status:</label>
+    <select name="status" class="rounded-md border-zinc-300 text-sm">
+      <%= for status <- [:all, :pending, :in_progress, :completed, :failed] do %>
+        <option value={status} selected={@filter_status == status}>
+          <%= String.capitalize(to_string(status)) %>
+        </option>
+      <% end %>
+    </select>
+  </form>
+</div>
+
+<div class="rounded-lg bg-white shadow-sm ring-1 ring-zinc-900/5">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Incident ID</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Current Step</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Progress</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Created</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-zinc-200">
+        <%= for workflow <- @workflows do %>
+          <tr class="hover:bg-zinc-50">
+            <td class="px-6 py-4">
+              <.link navigate={~p"/workflows/#{workflow.id}"} class="font-medium text-blue-600 hover:text-blue-800">
+                <%= workflow.incident_id %>
+              </.link>
+            </td>
+            <td class="px-6 py-4">
+              <span class={"inline-flex items-center rounded-md px-2 py-1 text-xs font-medium #{status_badge(workflow.status)}"}>
+                <%= workflow.status %>
+              </span>
+            </td>
+            <td class="px-6 py-4"><%= workflow.current_step %></td>
+            <td class="px-6 py-4">
+              <div class="w-full bg-zinc-200 rounded-full h-2.5">
+                <div class="bg-blue-600 h-2.5 rounded-full" style={"width: #{workflow_progress(workflow)}%"}></div>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-zinc-500">
+              <%= Calendar.strftime(workflow.inserted_at, "%b %d, %Y %H:%M") %>
+            </td>
+            <td class="px-6 py-4">
+              <%= if workflow.status == :failed do %>
+                <button
+                  phx-click="retry"
+                  phx-value-id={workflow.id}
+                  class="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700 mr-2"
+                >
+                  Retry
+                </button>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+"""
