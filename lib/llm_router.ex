@@ -161,7 +161,7 @@ defmodule LLMRouter do
     end
   end
 
-  defp do_analyze_endpoint(_url, metrics, %{api_key: nil} = _config) do
+  defp do_analyze_endpoint(_url, _metrics, %{api_key: nil} = _config) do
     {:ok,
      %{
        severity: :warning,
@@ -298,14 +298,9 @@ defmodule LLMRouter do
       |> String.upcase()
       |> String.trim()
 
-    case Severity.from_string(severity_str) do
-      nil ->
-        Logger.warning("Unknown severity from LLM: #{severity_str}, defaulting to WARNING")
-        {:ok, :warning}
+    severity = Severity.from_string(severity_str)
 
-      severity ->
-        {:ok, severity}
-    end
+    {:ok, severity}
   end
 
   defp parse_recovery_response(response) do

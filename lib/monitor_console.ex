@@ -241,7 +241,7 @@ defmodule Monitor.Console do
     end
   end
 
-  defp display_root_cause_analysis(url, last_result) do
+  defp display_root_cause_analysis(url, _last_result) do
     IO.puts("\n🔍 Root Cause Analysis:")
 
     case RootCauseAnalysis.analyze_correlations(url) do
@@ -256,7 +256,7 @@ defmodule Monitor.Console do
         if length(report.suggested_actions) > 0 do
           IO.puts("  Suggested Actions:")
 
-          Enum.with_index(report.suggested_actions, fn action, idx ->
+          Enum.with_index(report.suggested_actions, fn action, _idx ->
             IO.puts("    - #{action}")
           end)
         end

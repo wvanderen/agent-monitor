@@ -380,7 +380,7 @@ defmodule RootCauseAnalysis do
 
   defp do_find_root_cause(url, result, state) do
     event = FailureEvent.new(url, result)
-    events = do_get_events(url, 50, state)
+    _events = do_get_events(url, 50, state)
 
     report = %CorrelationReport{
       url: url,

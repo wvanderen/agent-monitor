@@ -3,8 +3,6 @@ defmodule AgentMonitorWeb.WorkflowDetailLive do
 
   import Ecto.Query
   alias AgentMonitor.Workflow
-  alias AgentMonitor.Conversation
-  alias AgentMonitor.ContextVersion
 
   @impl true
   def mount(%{"id" => workflow_id}, _session, socket) do

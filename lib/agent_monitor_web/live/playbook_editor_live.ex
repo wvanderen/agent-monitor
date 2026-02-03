@@ -4,6 +4,26 @@ defmodule AgentMonitorWeb.PlaybookEditorLive do
   alias AgentMonitor.Playbook
 
   @impl true
+  def mount(_params, _session, socket) do
+    playbook = %AgentMonitor.Playbook{
+      name: "",
+      description: "",
+      steps: []
+    }
+
+    socket =
+      assign(socket,
+        playbook: playbook,
+        step_name: "",
+        step_agent: "monitor_agent",
+        step_instructions: "",
+        step_requires_approval: false
+      )
+
+    {:ok, socket}
+  end
+
+  @impl true
   def mount(%{"id" => playbook_id}, _session, socket) do
     playbook = AgentMonitor.Repo.get!(AgentMonitor.Playbook, playbook_id)
 
@@ -54,6 +74,23 @@ defmodule AgentMonitorWeb.PlaybookEditorLive do
 
   @impl true
   def handle_event("save", %{}, socket) do
-    {:noreply, put_flash(socket, :info, "Playbook saved successfully")}
+    playbook = socket.assigns.playbook
+
+    attrs = %{
+      name: playbook.name,
+      description: playbook.description,
+      incident_type: playbook.incident_type,
+      steps: playbook.steps,
+      variables: playbook.variables || []
+    }
+
+    case AgentMonitor.Repo.update(Playbook.changeset(playbook, attrs)) do
+      {:ok, _updated_playbook} ->
+        {:noreply, put_flash(socket, :info, "Playbook saved successfully")}
+
+      {:error, changeset} ->
+        {:noreply,
+         put_flash(socket, :error, "Failed to save playbook: #{inspect(changeset.errors)}")}
+    end
   end
 end

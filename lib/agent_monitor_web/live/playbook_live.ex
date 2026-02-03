@@ -2,7 +2,6 @@ defmodule AgentMonitorWeb.PlaybookLive do
   use AgentMonitorWeb, :live_view
 
   import Ecto.Query
-  alias AgentMonitor.Playbook
 
   @impl true
   def mount(_params, _session, socket) do

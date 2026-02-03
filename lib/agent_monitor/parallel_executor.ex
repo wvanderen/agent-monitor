@@ -137,6 +137,9 @@ defmodule AgentMonitor.ParallelExecutor do
         Map.put(inner_acc, agent_result.agent, agent_result.result)
       end)
     end)
+  rescue
+    _ ->
+      %{}
   end
 
   defp build_base_context(workflow) do

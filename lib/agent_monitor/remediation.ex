@@ -34,8 +34,8 @@ defmodule AgentMonitor.Remediation do
 
       cond do
         is_nil(root_cause_output) ->
-          Logger.warning("No root cause analysis available, skipping remediation")
-          {:ok, %{status: :skipped, reason: "No root cause analysis available"}}
+          Logger.error("No root cause analysis available for remediation")
+          {:error, :no_root_cause_analysis}
 
         Map.get(root_cause_output, :status) == :no_issue ->
           Logger.info("No issues found by root cause analysis, remediation not needed")
@@ -51,7 +51,7 @@ defmodule AgentMonitor.Remediation do
     end
   end
 
-  defp perform_remediation(root_cause_output, monitor_output, context) do
+  defp perform_remediation(root_cause_output, monitor_output, _context) do
     Logger.info("Attempting remediation based on root cause analysis")
 
     url = Map.get(root_cause_output, :url) || Map.get(monitor_output, :url)

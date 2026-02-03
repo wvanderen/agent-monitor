@@ -239,7 +239,7 @@ defmodule AnomalyDetection do
       baseline ->
         metrics = do_get_metrics(metric.url, state.anomaly_window, state)
 
-        {severity, report} =
+        {_severity, report} =
           check_duration_anomaly(metric, baseline, metrics, state.threshold_multiplier)
           |> check_status_anomaly(metric, baseline, metrics)
 
@@ -280,7 +280,7 @@ defmodule AnomalyDetection do
      }}
   end
 
-  defp check_status_anomaly({severity, report}, metric, baseline, metrics) do
+  defp check_status_anomaly({severity, report}, _metric, baseline, metrics) do
     recent_failures = Enum.count(metrics, &(&1.status == :error))
 
     anomaly_type =
@@ -312,7 +312,7 @@ defmodule AnomalyDetection do
     end
   end
 
-  defp describe_duration_anomaly(metric, baseline, deviation, threshold) do
+  defp describe_duration_anomaly(_metric, baseline, deviation, threshold) do
     cond do
       baseline.std_duration_ms == 0 ->
         "Insufficient data for baseline comparison"

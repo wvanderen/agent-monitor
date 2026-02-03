@@ -27,7 +27,6 @@ defmodule AgentMonitor.RootCauseAnalysis do
     Logger.info("RootCauseAnalysis agent executing for workflow #{context.workflow_id}")
 
     try do
-      incident_data = Map.get(context, :incident_data)
       previous_outputs = Map.get(context, :previous_outputs)
 
       monitor_output = Map.get(previous_outputs, :monitor_agent)

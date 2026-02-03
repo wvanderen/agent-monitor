@@ -70,14 +70,16 @@ defmodule Notifications.Channels.Email do
 
     email =
       if config.reply_to do
-        Swoosh.Email.put_header(email, "Reply-To", config.reply_to)
+        Swoosh.Email.header(email, "Reply-To", config.reply_to)
       else
         email
       end
 
     Logger.debug("Sending email notification: #{subject}")
 
-    case Swoosh.Api.deliver(email, get_swoosh_adapter()) do
+    adapter_config = get_swoosh_adapter()
+
+    case deliver_with_adapter(email, adapter_config) do
       {:ok, _response} ->
         Logger.info("✓ Email notification sent successfully")
         {:ok, %{status: :sent}}
@@ -253,6 +255,18 @@ defmodule Notifications.Channels.Email do
     case System.get_env(env_var) do
       nil -> default
       val -> String.to_integer(val)
+    end
+  end
+
+  defp deliver_with_adapter(email, {adapter_module, adapter_config}) do
+    case adapter_module.deliver(email, adapter_config) do
+      {:ok, _response} ->
+        Logger.info("✓ Email notification sent successfully")
+        {:ok, %{status: :sent}}
+
+      {:error, reason} ->
+        Logger.error("✗ Email notification failed: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 end
